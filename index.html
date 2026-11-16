@@ -1,0 +1,2329 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7f4ec">
+<meta name="color-scheme" content="light">
+<meta name="description" content="미취학부터 초등까지 추천도서, 도서관 대여 확인, 바코드 등록, 읽은 책 세기까지 한 화면에서.">
+<title>책자람 — 미취학·초등 독서 기록</title>
+<style>
+  :root{
+    --paper:#f7f4ec; --card:#fffdf9; --ink:#28261f; --muted:#7c7869; --line:#e7e1d3;
+    --brand:#2e6b58; --brand-2:#3f8a6f; --brand-soft:#e8f2ed; --brand-ink:#1f4b3e;
+    --accent:#ef9f4b; --accent-soft:#fdf1e2; --danger:#bf5741; --danger-soft:#fbeae6;
+    --p1:#b9791f; --p1s:#fbf0dc;
+    --p2:#4f7f43; --p2s:#e9f3e3;
+    --p3:#3f6d9e; --p3s:#e8f0f8;
+    --p4:#7a5b9e; --p4s:#f1eaf8;
+    --r-lg:20px; --r-md:14px; --r-sm:10px;
+    --shadow:0 10px 26px rgba(40,38,31,.07);
+    --shadow-sm:0 3px 10px rgba(40,38,31,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%, #efe8d8 0%, #e9e3d4 55%, #e4ddcc 100%);
+    color:var(--ink); font-size:16px; line-height:1.5; -webkit-text-size-adjust:100%;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width:440px; margin:0 auto; min-height:100dvh; background:var(--paper);
+    position:relative; display:flex; flex-direction:column;
+    box-shadow:0 0 0 1px rgba(40,38,31,.05), 0 24px 60px rgba(40,38,31,.10);
+  }
+  .appbar{
+    position:sticky; top:0; z-index:30;
+    background:rgba(247,244,236,.92); backdrop-filter:saturate(1.3) blur(10px);
+    border-bottom:1px solid var(--line);
+    padding-top:env(safe-area-inset-top);
+  }
+  .appbar-in{display:flex; align-items:center; gap:10px; padding:12px 16px}
+  .brand{display:flex; align-items:center; gap:10px; min-width:0; flex:1}
+  .brand-mark{
+    width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:20px;
+    background:linear-gradient(145deg,#fff6e6,#f6e3c2); border:1px solid #efdfc4; flex:none;
+  }
+  .brand-name{font-size:17px; font-weight:800; letter-spacing:-.02em; line-height:1.2}
+  .brand-sub{font-size:11.5px; color:var(--muted); letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .icon-btn{
+    width:42px;height:42px;border-radius:13px;border:1px solid var(--line); background:#fffdf9;
+    display:grid;place-items:center; color:var(--ink); cursor:pointer; flex:none;
+  }
+  .icon-btn:active{transform:scale(.96)}
+  .main{flex:1 0 auto; padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+  .pad{padding:16px 16px 8px}
+  .h1{font-size:21px; font-weight:800; letter-spacing:-.03em; margin:2px 0 4px}
+  .sub{font-size:13px; color:var(--muted); margin:0 0 14px; letter-spacing:-.01em}
+  .section-title{font-size:14px; font-weight:700; letter-spacing:-.02em; margin:22px 0 10px; display:flex; align-items:center; justify-content:space-between; gap:8px}
+  .section-title .aside{font-size:12px; font-weight:500; color:var(--muted)}
+
+  /* search + chips */
+  .searchbox{position:relative; margin-bottom:10px}
+  .searchbox input{
+    width:100%; height:46px; border-radius:14px; border:1px solid var(--line); background:#fffdf9;
+    padding:0 14px 0 40px; font-size:15px; color:var(--ink); outline:none;
+    font-family:inherit;
+  }
+  .searchbox input:focus{border-color:var(--brand-2); box-shadow:0 0 0 3px rgba(63,138,111,.12)}
+  .searchbox .ico{position:absolute; left:13px; top:13px; font-size:16px; opacity:.5}
+  .chips{display:flex; gap:7px; overflow-x:auto; padding:2px 0 8px; scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{
+    flex:none; border:1px solid var(--line); background:#fffdf9; color:var(--muted);
+    border-radius:999px; padding:8px 13px; font-size:13px; font-weight:600; cursor:pointer;
+    letter-spacing:-.01em; font-family:inherit;
+  }
+  .chip.is-on{background:var(--ink); border-color:var(--ink); color:#fff}
+  .list-head{display:flex; align-items:baseline; justify-content:space-between; margin:6px 2px 10px; font-size:12.5px; color:var(--muted)}
+  .list-head b{color:var(--brand); font-weight:800}
+
+  /* book card */
+  .book{
+    display:flex; gap:12px; padding:13px; background:var(--card); border:1px solid var(--line);
+    border-radius:18px; margin-bottom:10px; box-shadow:var(--shadow-sm);
+  }
+  .book.is-read{background:linear-gradient(180deg,#f6fbf7,#fffdf9); border-color:#d5e7db}
+  .cover{
+    width:62px; height:86px; border-radius:9px; flex:none; display:grid; place-items:center;
+    background:linear-gradient(150deg,var(--cs1,#fde8c8),var(--cs2,#f7c78b));
+    font-size:27px; box-shadow:inset -7px 0 0 rgba(0,0,0,.05), 0 4px 10px rgba(40,38,31,.10);
+    position:relative; overflow:hidden;
+  }
+  .cover::after{content:""; position:absolute; left:5px; top:0; bottom:0; width:1px; background:rgba(255,255,255,.5)}
+  .book-main{min-width:0; flex:1}
+  .book-top{display:flex; align-items:flex-start; gap:8px; justify-content:space-between}
+  .book-title{font-size:15.5px; font-weight:800; letter-spacing:-.03em; margin:0; line-height:1.3}
+  .band{font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; flex:none; letter-spacing:-.01em}
+  .band-p1{background:var(--p1s); color:var(--p1)}
+  .band-p2{background:var(--p2s); color:var(--p2)}
+  .band-p3{background:var(--p3s); color:var(--p3)}
+  .band-p4{background:var(--p4s); color:var(--p4)}
+  .band-p0{background:#f0ede4; color:#6f6a5c}
+  .book-meta{font-size:12px; color:var(--muted); margin:2px 0 6px; letter-spacing:-.01em}
+  .book-why{font-size:12.8px; color:#4c483e; margin:0 0 6px; line-height:1.55; letter-spacing:-.01em}
+  .book-why.clamp{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  .more{background:none;border:0;padding:0 0 6px;color:var(--brand-2);font-size:11.5px;font-weight:700;font-family:inherit;cursor:pointer}
+  .book-tags{font-size:11.5px; color:var(--brand-2); margin:0 0 9px; font-weight:600; letter-spacing:-.01em}
+  .book-actions{display:flex; gap:6px; flex-wrap:wrap}
+  .isbn{font-size:11px; color:#a09a8b; margin:8px 0 0; letter-spacing:.02em}
+
+  .btn{
+    border:1px solid transparent; background:#fff; color:var(--ink); font-family:inherit;
+    font-size:14px; font-weight:700; letter-spacing:-.02em; border-radius:12px; padding:12px 14px;
+    cursor:pointer; display:inline-flex; align-items:center; gap:6px; justify-content:center;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn-xs{font-size:12.5px; padding:8px 10px; border-radius:10px; font-weight:700}
+  .btn-primary{background:var(--brand); color:#fff; box-shadow:0 6px 16px rgba(46,107,88,.22)}
+  .btn-ghost{background:#fffdf9; border-color:var(--line); color:#4c483e}
+  .btn-soft{background:var(--brand-soft); color:var(--brand-ink); border-color:#d8e9e0}
+  .btn-accent{background:var(--accent-soft); color:#96601f; border-color:#f4dfc2}
+  .btn-on{background:var(--brand); color:#fff; border-color:var(--brand)}
+  .btn-danger{background:var(--danger-soft); color:var(--danger); border-color:#f2d5cd}
+  .btn-full{width:100%}
+  .btn[disabled]{opacity:.55; cursor:default}
+
+  .note{font-size:11.5px; color:#96907f; line-height:1.6; margin:14px 2px 0; letter-spacing:-.01em}
+
+  /* cards & forms */
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:14px; margin-bottom:12px; box-shadow:var(--shadow-sm)}
+  .card-title{font-size:13px; font-weight:800; letter-spacing:-.02em; margin:0 0 10px; display:flex; align-items:center; gap:6px}
+  .field{margin-bottom:11px}
+  .label{display:block; font-size:12px; font-weight:700; color:#6b6657; margin-bottom:5px; letter-spacing:-.01em}
+  .input,.select,textarea.input{
+    width:100%; height:44px; border-radius:12px; border:1px solid var(--line); background:#fffdf9;
+    padding:0 12px; font-size:14.5px; color:var(--ink); font-family:inherit; outline:none;
+  }
+  textarea.input{height:auto; min-height:96px; padding:11px 12px; line-height:1.55; resize:vertical}
+  .input:focus,.select:focus,textarea.input:focus{border-color:var(--brand-2); box-shadow:0 0 0 3px rgba(63,138,111,.12)}
+  .row2{display:flex; gap:8px}
+  .row2 > *{flex:1; min-width:0}
+  .btns{display:flex; gap:8px; margin-top:4px}
+  .btns > .btn{flex:1}
+  .hint{font-size:11.5px; color:#96907f; margin:9px 0 0; line-height:1.55; letter-spacing:-.01em}
+  .hint a{color:var(--brand-2); text-decoration:none; font-weight:700}
+
+  /* library results */
+  .demo-banner{
+    display:flex; gap:8px; align-items:flex-start; background:var(--accent-soft); border:1px dashed #eccfa6;
+    color:#8a5a1d; border-radius:14px; padding:11px 12px; font-size:12.3px; line-height:1.5; margin-bottom:10px;
+  }
+  .libitem{border:1px solid var(--line); border-radius:14px; padding:12px; background:#fffdf9; margin-bottom:8px}
+  .lib-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:4px}
+  .lib-name{font-size:14px; font-weight:800; letter-spacing:-.02em}
+  .badge{font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:6px; flex:none; letter-spacing:-.01em}
+  .badge-ok{background:#e4f3e8; color:#2f7a45}
+  .badge-out{background:#fbeae6; color:#b2503a}
+  .badge-q{background:#f1efe7; color:#78715f}
+  .lib-meta{font-size:11.8px; color:var(--muted); line-height:1.5; letter-spacing:-.01em}
+  .lib-meta a{color:var(--brand-2); text-decoration:none; font-weight:700}
+  .lib-actions{display:flex; gap:6px; margin-top:8px; flex-wrap:wrap}
+  .error-card{background:var(--danger-soft); border:1px solid #f0d3cb; color:#98402c; border-radius:14px; padding:12px; font-size:12.8px; line-height:1.55}
+  .error-card b{display:block; margin-bottom:4px}
+  .empty{text-align:center; padding:36px 16px; color:var(--muted); font-size:13.5px}
+  .empty .em{font-size:30px; display:block; margin-bottom:8px}
+
+  /* stats */
+  .stat-hero{background:linear-gradient(160deg,#2e6b58,#245245); color:#fff; border-radius:22px; padding:18px; display:flex; align-items:center; gap:16px; box-shadow:0 12px 28px rgba(36,82,69,.25); margin-bottom:12px}
+  .ring{width:96px; height:96px; flex:none; transform:rotate(-90deg)}
+  .ring-bg{fill:none; stroke:rgba(255,255,255,.22); stroke-width:10}
+  .ring-fg{fill:none; stroke:#f6d38b; stroke-width:10; stroke-linecap:round; transition:stroke-dashoffset .5s ease}
+  .ring-wrap{position:relative; width:96px; height:96px; flex:none}
+  .ring-num{position:absolute; inset:0; display:grid; place-items:center; font-size:20px; font-weight:800; letter-spacing:-.03em}
+  .ring-num small{font-size:11px; font-weight:700; opacity:.8; display:block; text-align:center; margin-top:-2px}
+  .hero-text{min-width:0}
+  .hero-text .big{font-size:15px; font-weight:700; letter-spacing:-.02em; opacity:.9}
+  .hero-text .num{font-size:30px; font-weight:800; letter-spacing:-.04em; line-height:1.15}
+  .hero-text .num small{font-size:14px; font-weight:700; opacity:.8}
+  .hero-text .goal{font-size:12px; opacity:.85; margin-top:4px; letter-spacing:-.01em}
+  .quick-btns{display:flex; gap:7px; margin-top:12px}
+  .quick-btns .btn{flex:1; background:rgba(255,255,255,.14); color:#fff; border-color:rgba(255,255,255,.22); font-size:12.5px; padding:9px 8px; white-space:nowrap}
+
+  .bar-row{margin-bottom:10px}
+  .bar-top{display:flex; justify-content:space-between; font-size:12.3px; margin-bottom:5px; letter-spacing:-.01em}
+  .bar-top .n{font-weight:800; color:var(--ink)}
+  .bar{height:9px; background:#eee8da; border-radius:999px; overflow:hidden}
+  .bar > i{display:block; height:100%; border-radius:999px; transition:width .4s ease}
+  .bar-p1{background:linear-gradient(90deg,#e0a546,#c98a2c)}
+  .bar-p2{background:linear-gradient(90deg,#6aa95b,#4f7f43)}
+  .bar-p3{background:linear-gradient(90deg,#5e8dbf,#3f6d9e)}
+  .bar-p4{background:linear-gradient(90deg,#9a79bd,#7a5b9e)}
+  .bar-p0{background:linear-gradient(90deg,#a9a395,#8b8577)}
+
+  .logitem{border:1px solid var(--line); border-radius:14px; padding:11px 12px; background:#fffdf9; margin-bottom:8px}
+  .log-top{display:flex; justify-content:space-between; gap:8px; align-items:baseline}
+  .log-title{font-size:13.5px; font-weight:800; letter-spacing:-.02em}
+  .log-date{font-size:11px; color:#a09a8b; flex:none}
+  .log-type{font-size:11.5px; color:var(--brand-2); font-weight:700; margin-top:2px}
+  .log-memo{font-size:12.5px; color:#4c483e; margin-top:5px; line-height:1.55; white-space:pre-wrap; letter-spacing:-.01em}
+  .stars{display:flex; gap:2px; font-size:14px; margin-top:4px; color:#dcd5c5}
+  .star{background:none; border:0; padding:0 1px; font-size:19px; line-height:1; cursor:pointer; color:#ddd6c6; font-family:inherit}
+  .star.is-on{color:#e8a33c}
+  .log-del{background:none;border:0;color:#a09a8b;font-size:11.5px;cursor:pointer;font-family:inherit;padding:2px 0}
+
+  /* tabs */
+  .tabbar{
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:440px; z-index:40;
+    display:flex; background:rgba(255,253,249,.96); backdrop-filter:blur(10px);
+    border-top:1px solid var(--line); padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+  }
+  .tab-btn{
+    flex:1; background:none; border:0; font-family:inherit; cursor:pointer; color:#9a9484;
+    display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 0 4px; border-radius:12px;
+  }
+  .tab-btn .tab-ico{width:23px; height:23px; display:block}
+  .tab-btn .tab-label{font-size:10.5px; font-weight:700; letter-spacing:-.01em}
+  .tab-btn.is-active{color:var(--brand)}
+  .tab-btn.is-active .tab-ico{transform:translateY(-1px)}
+
+  /* sheet */
+  .backdrop{position:fixed; inset:0; background:rgba(28,26,22,.42); z-index:50; opacity:0; transition:opacity .2s ease}
+  .backdrop.is-open{opacity:1}
+  .sheet{
+    position:fixed; left:50%; bottom:0; transform:translate(-50%,102%); width:100%; max-width:440px; z-index:60;
+    background:var(--paper); border-radius:22px 22px 0 0; max-height:90dvh; overflow:auto;
+    transition:transform .26s cubic-bezier(.2,.8,.3,1); padding-bottom:calc(18px + env(safe-area-inset-bottom));
+    box-shadow:0 -14px 40px rgba(28,26,22,.25);
+  }
+  .sheet.is-open{transform:translate(-50%,0)}
+  .sheet-head{position:sticky; top:0; background:var(--paper); padding:16px 18px 10px; display:flex; align-items:flex-start; gap:10px; border-bottom:1px solid var(--line); z-index:2}
+  .sheet-head h2{font-size:17px; font-weight:800; letter-spacing:-.03em; margin:0; flex:1; line-height:1.35}
+  .sheet-head .sheet-sub{font-size:12px; color:var(--muted); margin-top:3px; font-weight:500}
+  .sheet-close{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fffdf9;font-size:16px;cursor:pointer;flex:none;color:#6b6657}
+  .sheet-body{padding:16px 18px}
+  .act{border:1px solid var(--line); border-radius:14px; padding:12px; background:#fffdf9; margin-bottom:9px}
+  .act-head{display:flex; align-items:center; gap:7px; margin-bottom:5px}
+  .act-ico{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--brand-soft);font-size:13px;flex:none}
+  .act-type{font-size:11px; font-weight:800; color:var(--brand); letter-spacing:-.01em}
+  .act-title{font-size:13.5px; font-weight:800; letter-spacing:-.02em; margin:0 0 4px}
+  .act-prompt{font-size:12.5px; color:#4c483e; margin:0; line-height:1.55; letter-spacing:-.01em}
+  .divider{height:1px; background:var(--line); margin:16px 0}
+  .type-chips{display:flex; gap:6px; flex-wrap:wrap}
+  .toast{
+    position:fixed; left:50%; bottom:calc(96px + env(safe-area-inset-bottom)); transform:translate(-50%,8px);
+    background:#28261f; color:#fff; font-size:13px; font-weight:600; padding:10px 16px; border-radius:999px;
+    z-index:80; opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease; max-width:90%;
+    text-align:center; letter-spacing:-.01em;
+  }
+  .toast.is-on{opacity:1; transform:translate(-50%,0)}
+  body.sheet-open .toast{bottom:auto; top:calc(14px + env(safe-area-inset-top)); transform:translate(-50%,-8px)}
+  body.sheet-open .toast.is-on{transform:translate(-50%,0)}
+  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0}
+
+  /* scan */
+  .scan-frame{border-radius:16px; overflow:hidden; background:#1f1d19; min-height:180px; display:grid; place-items:center; color:#cfc9bb; font-size:12.5px; text-align:center; padding:16px}
+  #reader{width:100%}
+  #reader video{width:100%!important; border-radius:12px}
+  .scan-mock{display:grid; place-items:center; gap:8px}
+  .scan-mock svg{width:78%; max-width:240px; height:auto; opacity:.9}
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important; animation:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="appbar">
+    <div class="appbar-in">
+      <div class="brand">
+        <span class="brand-mark">📚</span>
+        <div style="min-width:0">
+          <div class="brand-name">책자람</div>
+          <div class="brand-sub" id="brandSub">미취학·초등 독서 기록</div>
+        </div>
+      </div>
+      <button class="icon-btn" id="btnSettings" data-act="openSettings" aria-label="설정">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+          <circle cx="12" cy="12" r="3.2"></circle>
+          <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.56V21a2 2 0 1 1-4 0v-.11a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1H3a2 2 0 1 1 0-4h.11A1.7 1.7 0 0 0 4.6 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 8.96 4.6 1.7 1.7 0 0 0 10 3.04V3a2 2 0 1 1 4 0v.11a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V10a1.7 1.7 0 0 0 1.56 1H21a2 2 0 1 1 0 4h-.11a1.7 1.7 0 0 0-1.49 1z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main" id="main">
+    <section id="tab-books" aria-label="추천도서"></section>
+    <section id="tab-library" aria-label="도서관 대여 확인"></section>
+    <section id="tab-scan" aria-label="바코드 등록"></section>
+    <section id="tab-shelf" aria-label="내 책장"></section>
+  </main>
+
+  <nav class="tabbar" role="tablist" aria-label="주요 메뉴">
+    <button class="tab-btn is-active" data-tab="books" role="tab" aria-selected="true">
+      <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5z"></path><path d="M4 20.5V5.5"></path><path d="M8 7h7"></path>
+      </svg>
+      <span class="tab-label">추천도서</span>
+    </button>
+    <button class="tab-btn" data-tab="library" role="tab" aria-selected="false">
+      <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 10.5 12 4l9 6.5"></path><path d="M5 10v9M9.5 10v9M14.5 10v9M19 10v9"></path><path d="M3 21h18"></path>
+      </svg>
+      <span class="tab-label">도서관</span>
+    </button>
+    <button class="tab-btn" data-tab="scan" role="tab" aria-selected="false">
+      <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"></path><path d="M8 8v8M11 8v8M14 8v8M17 8v8"></path>
+      </svg>
+      <span class="tab-label">바코드</span>
+    </button>
+    <button class="tab-btn" data-tab="shelf" role="tab" aria-selected="false">
+      <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 20V11M9.3 20V5M14.7 20v-7M20 20V8"></path>
+      </svg>
+      <span class="tab-label">내 책장</span>
+    </button>
+  </nav>
+</div>
+
+<div class="backdrop" id="backdrop" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script defer src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     1. 기준 데이터
+     ============================================================ */
+
+  var STORE_KEY = 'chaekjaram.v1';
+  var BANDS = ['preschool', 'low', 'mid', 'high'];
+  var BAND_LABEL = { preschool: '미취학', low: '초1~2', mid: '초3~4', high: '초5~6', etc: '직접 등록' };
+  var BAND_FULL = {
+    preschool: '미취학(4~7세)',
+    low: '초등 저학년(1~2학년)',
+    mid: '초등 중학년(3~4학년)',
+    high: '초등 고학년(5~6학년)',
+    etc: '직접 등록한 책'
+  };
+  var BAND_CLASS = { preschool: 'band-p1', low: 'band-p2', mid: 'band-p3', high: 'band-p4', etc: 'band-p0' };
+  var BAND_BAR = { preschool: 'bar-p1', low: 'bar-p2', mid: 'bar-p3', high: 'bar-p4', etc: 'bar-p0' };
+
+  var ACT_TYPES = {
+    talk: { label: '이야기 나누기', icon: '💬' },
+    make: { label: '그리기·만들기', icon: '🎨' },
+    write: { label: '쓰기', icon: '✏️' },
+    play: { label: '놀이·신체', icon: '🤸' },
+    observe: { label: '관찰·조사', icon: '🔍' }
+  };
+
+  var COVER_COLORS = [
+    ['#fde8c8', '#f6c184'], ['#e4f0d8', '#a8ce8f'], ['#dbe9f7', '#a3c2e6'], ['#f4e5f7', '#c7a7de'],
+    ['#fbe1dc', '#efa48f'], ['#dcf1ee', '#9cd2c6'], ['#fdf0c6', '#eccf77'], ['#e7e5f8', '#b6aee4']
+  ];
+
+  var BOOKS = [
+    {
+      id: 'b01', title: '구름빵', author: '백희나', publisher: '한솔수북', year: '2019',
+      isbn: '9791170283836', band: 'preschool', emoji: '☁️', tags: ['가족', '상상', '음식'],
+      why: '비 오는 날 나뭇가지에 걸린 구름으로 빵을 구워 먹고 온 가족이 하늘로 두둥실 떠오르는 이야기. 입체 작품을 사진으로 찍은 그림이라 화면 속 공간이 손에 잡힐 듯하고, 먹을거리와 하늘을 나는 상상이 만나 아이가 금방 이야기 속으로 들어간다.',
+      activities: [
+        { t: 'talk', title: '구름빵을 먹고 어디로?', prompt: '구름빵을 먹으면 어디로 가고 싶은지, 누구와 함께 가고 싶은지 이야기해 보세요.' },
+        { t: 'make', title: '나만의 구름빵 접시', prompt: '종이 접시에 나만의 구름빵을 그려 보세요. 어떤 재료를 넣으면 어떤 맛일까요?' },
+        { t: 'write', title: '아빠에게 빵을 준 마음', prompt: '바쁜 아빠에게 빵을 갖다 준 아이들의 마음을 한 줄로 적어 보세요.' }
+      ]
+    },
+    {
+      id: 'b02', title: '강아지똥', author: '권정생·정승각 그림', publisher: '길벗어린이', year: '2014',
+      isbn: '9788986621136', band: 'preschool', emoji: '🌼', tags: ['생명', '나눔', '봄'],
+      why: '아무도 거들떠보지 않는 강아지똥이 민들레 꽃을 피워 내는 이야기. 하찮게 여겨지는 것도 꽃을 피우는 밑거름이 된다는 것을 조용히 알려 준다. "쓸모없는 것은 없단다"라는 말이 오래 남는다.',
+      activities: [
+        { t: 'talk', title: '쓸모없는 것은 없단다', prompt: '내 주변에서 강아지똥처럼 작고 하찮아 보이지만 쓸모 있는 것은 무엇일까요?' },
+        { t: 'make', title: '민들레꽃 그리기', prompt: '강아지똥이 피워 낸 민들레꽃을 그리고, 그 옆에 강아지똥의 마음을 적어 보세요.' },
+        { t: 'observe', title: '봄 들풀 찾기', prompt: '우리 동네에서 만나는 풀과 꽃을 찾아 사진을 찍고 이름을 붙여 보세요.' }
+      ]
+    },
+    {
+      id: 'b03', title: '사과가 쿵!', author: '다다 히로시', publisher: '보림', year: '2009',
+      isbn: '9788943306090', band: 'preschool', emoji: '🍎', tags: ['동물', '수 세기', '반복'],
+      why: '커다란 사과가 쿵 떨어지자 동물 친구들이 하나둘 모여드는 그림책. "쿵" 하고 반복되는 소리와 동물이 늘어나는 리듬이 좋아, 글자를 읽기 전 아이도 함께 읽을 수 있다.',
+      activities: [
+        { t: 'play', title: '동물 흉내 놀이', prompt: '사과가 떨어지는 장면을 따라 하며 동물마다 걸음과 소리를 흉내 내 보세요.' },
+        { t: 'talk', title: '다음엔 누가 올까?', prompt: '사과를 먹으러 다음에 올 동물을 생각해 보고, 크기를 견주어 말해 보세요.' },
+        { t: 'observe', title: '사과 씨 세기', prompt: '사과 한 개를 잘라 씨가 몇 개인지 세어 보고, 씨를 심으면 어떻게 될지 이야기해 보세요.' }
+      ]
+    },
+    {
+      id: 'b04', title: '달샤베트', author: '백희나', publisher: '스토리보울', year: '2024',
+      isbn: '9791198610652', band: 'preschool', emoji: '🌙', tags: ['여름', '이웃', '나눔'],
+      why: '무더운 여름밤, 녹아내린 달을 할머니가 샤베트로 만들어 이웃과 나눠 먹는 이야기. 더위를 식히는 상상과 이웃과 나누는 마음이 함께 담겨 있어 여름밤에 읽으면 시원한 기분이 난다.',
+      activities: [
+        { t: 'make', title: '달 샤베트 만들기', prompt: '달 조각을 닮은 샤베트를 그리거나, 얼린 과일로 진짜 샤베트를 만들어 보세요.' },
+        { t: 'talk', title: '더위에 힘든 이웃', prompt: '우리 동네에서 더위에 힘든 사람은 누구일지, 무엇을 나눌 수 있을지 이야기해 보세요.' },
+        { t: 'write', title: '여름밤 그림일기', prompt: '오늘 밤 하늘에서 본 것을 그림일기로 남겨 보세요.' }
+      ]
+    },
+    {
+      id: 'b05', title: '무지개 물고기', author: '마르쿠스 피스터', publisher: '시공주니어', year: '2010',
+      isbn: '9788972590637', band: 'preschool', emoji: '🐠', tags: ['우정', '나눔', '바다'],
+      why: '반짝이는 비늘을 자랑하던 물고기가 비늘을 나눠 주며 친구를 얻는 이야기. 혼자 반짝이는 것과 함께 어울리는 것의 차이를 아이 눈높이에서 보여 준다.',
+      activities: [
+        { t: 'make', title: '무지개 비늘 꾸미기', prompt: '색종이나 스티커로 무지개 물고기의 비늘을 꾸며 보세요.' },
+        { t: 'talk', title: '나눠 줄 수 있는 것', prompt: '친구에게 나눠 줄 수 있는 것은 무엇이 있을까요? 나눈 뒤 기분은 어땠나요?' },
+        { t: 'observe', title: '바다 물고기 조사', prompt: '바다에 사는 물고기 이름과 생김새를 찾아보고 그림으로 남겨 보세요.' }
+      ]
+    },
+    {
+      id: 'b06', title: '괴물들이 사는 나라', author: '모리스 샌닥', publisher: '시공주니어', year: '2017',
+      isbn: '9788952782748', band: 'preschool', emoji: '👹', tags: ['감정', '상상', '가족'],
+      why: '장난꾸러기 맥스가 괴물들의 나라로 건너가 왕이 되어 신나게 놀다가 집으로 돌아오는 이야기. 화가 나고 속상한 마음을 상상 속에서 마음껏 부딪혀 보고, 결국 따뜻한 저녁밥이 기다리는 집으로 돌아온다.',
+      activities: [
+        { t: 'talk', title: '화가 났을 때 떠나는 곳', prompt: '화가 났을 때 어디로 떠나고 싶은지, 그곳에서 무엇을 하고 싶은지 이야기해 보세요.' },
+        { t: 'make', title: '나만의 괴물 친구', prompt: '나만의 괴물 친구를 그려 이름을 붙이고, 좋아하는 것과 싫어하는 것을 적어 보세요.' },
+        { t: 'write', title: '화가 풀린 순간', prompt: '오늘 화가 났던 일과 마음이 풀린 순간을 적어 보세요.' }
+      ]
+    },
+    {
+      id: 'b07', title: '알사탕', author: '백희나', publisher: '스토리보울', year: '2024',
+      isbn: '9791198610614', band: 'preschool', emoji: '🍬', tags: ['공감', '마음', '상상'],
+      why: '알사탕을 먹으면 물건들의 마음이 들리는 동동이의 이야기. 말하지 못하는 소파와 신발, 나무의 속마음을 들으며 다른 존재의 마음을 헤아리는 연습이 된다. 《나는 개다》와 이어 읽기도 좋다.',
+      activities: [
+        { t: 'talk', title: '우리 집 물건의 마음', prompt: '우리 집 물건이 말을 한다면 무슨 말을 할지 하나씩 흉내 내 보세요.' },
+        { t: 'make', title: '물건에 표정 붙이기', prompt: '소파, 신발, 인형 그림에 표정을 그려 붙이고 마음을 적어 보세요.' },
+        { t: 'write', title: '알사탕을 먹는다면', prompt: '알사탕을 하나 먹고 어떤 소리를 들었는지 상상해서 써 보세요.' }
+      ]
+    },
+    {
+      id: 'b08', title: '아주아주 배고픈 애벌레', author: '에릭 칼', publisher: '시공주니어', year: '2022',
+      isbn: '9791165799892', band: 'preschool', emoji: '🐛', tags: ['자연', '숫자', '요일'],
+      why: '배고픈 애벌레가 여러 가지를 먹고 자라 나비가 되기까지를 구멍 뚫린 책으로 보여 준다. 먹이와 요일, 숫자, 생태 변화가 한 권에 담겨 있고 손가락으로 구멍을 찔러 보며 놀 수 있어 4~5세가 특히 좋아한다.',
+      activities: [
+        { t: 'observe', title: '나비가 되는 순서', prompt: '알에서 애벌레, 번데기, 나비로 이어지는 순서를 카드로 만들어 늘어놓아 보세요.' },
+        { t: 'play', title: '요일별 과일 세기', prompt: '월요일부터 먹은 과일 수를 세며 숫자를 맞춰 보세요.' },
+        { t: 'make', title: '색종이 나비', prompt: '색종이를 접어 나비 날개를 만들고 무늬를 그려 보세요.' }
+      ]
+    },
+    {
+      id: 'b09', title: '수박 수영장', author: '안녕달', publisher: '창비', year: '2023',
+      isbn: '9788936446819', band: 'low', emoji: '🍉', tags: ['여름', '상상', '마을'],
+      why: '뜨거운 여름날 커다란 수박을 파서 만든 수영장에 온 마을 사람들이 모여드는 이야기. 별말 없이 펼쳐지는 여름 풍경과 사람들의 표정이 재미있고, 더위를 식히는 상상이 통째로 즐겁다.',
+      activities: [
+        { t: 'make', title: '우리 동네 수영장', prompt: '우리 동네에 수박 수영장이 생긴다면 어떤 모습일지 그려 보세요.' },
+        { t: 'talk', title: '수영장에서 하고 싶은 놀이', prompt: '수박 수영장에서 가장 하고 싶은 놀이와 그 이유를 이야기해 보세요.' },
+        { t: 'observe', title: '여름 과일 관찰', prompt: '수박의 겉과 속을 관찰하고 씨를 세어 보세요.' }
+      ]
+    },
+    {
+      id: 'b10', title: '책 먹는 여우', author: '프란치스카 비어만', publisher: '주니어김영사', year: '2018',
+      isbn: '9788934908067', band: 'low', emoji: '🦊', tags: ['책', '유머', '도서관'],
+      why: '책을 읽지 않고 소금과 후추를 쳐서 먹어 버리는 여우 이야기. 책을 먹고 똑똑해진 여우의 우스운 소동을 따라가다 보면 읽는 즐거움과 도서관 예절을 함께 만난다.',
+      activities: [
+        { t: 'write', title: '여우에게 추천하는 책', prompt: '여우에게 새로 추천할 책을 골라 소개 카드를 만들어 보세요.' },
+        { t: 'talk', title: '책을 먹으면 똑똑해질까?', prompt: '책을 먹는 것과 읽는 것은 어떻게 다를까요? 함께 이야기해 보세요.' },
+        { t: 'play', title: '책 제목 요리', prompt: '가족이 책 제목만 보고 요리 이름을 지어 보세요. 누가 제일 그럴듯한가요?' }
+      ]
+    },
+    {
+      id: 'b11', title: '돼지책', author: '앤서니 브라운', publisher: '웅진주니어', year: '2022',
+      isbn: '9788901033518', band: 'low', emoji: '🐖', tags: ['가족', '집안일', '평등'],
+      why: '집안일을 돕지 않는 아빠와 아들, 그 사이에서 지친 엄마가 사라지자 집 안이 변하는 이야기. 가족 모두가 살림을 나누는 일을 유머와 그림 변화로 보여 주어, 읽고 나서 우리 집 이야기를 하기 좋다.',
+      activities: [
+        { t: 'talk', title: '우리 집 집안일 나누기', prompt: '우리 집 집안일을 모두 적고, 누가 무엇을 맡을지 함께 정해 보세요.' },
+        { t: 'make', title: '집 그림 비교', prompt: '엄마가 사라지기 전 집과 후의 집 그림을 비교해 그려 보세요.' },
+        { t: 'write', title: '내가 맡을 수 있는 일', prompt: '내가 맡을 수 있는 집안일 세 가지를 적고 실천표를 만들어 보세요.' }
+      ]
+    },
+    {
+      id: 'b12', title: '치과의사 드소토 선생님', author: '윌리엄 스타이그', publisher: '비룡소', year: '2020',
+      isbn: '9788949110097', band: 'low', emoji: '🦷', tags: ['지혜', '용기', '직업'],
+      why: '쥐 치과의사 드소토가 무서운 여우의 이빨을 고쳐 주는 이야기. 두려운 상대를 지혜로 이겨 내고 약속을 지키는 모습이 유쾌하고, 이 닦기 습관을 이야기하기에도 좋다.',
+      activities: [
+        { t: 'talk', title: '여우가 또 온다면', prompt: '여우가 또 찾아오면 드소토 선생님은 어떻게 할지 생각해 보세요.' },
+        { t: 'make', title: '내 이 지도', prompt: '이 모양을 그리고 내 이가 몇 개인지 세어 보세요.' },
+        { t: 'write', title: '선생님께 칭찬 편지', prompt: '드소토 선생님께 칭찬과 고마움을 담은 편지를 써 보세요.' }
+      ]
+    },
+    {
+      id: 'b13', title: '나는 개다', author: '백희나', publisher: '스토리보울', year: '2024',
+      isbn: '9791198610676', band: 'low', emoji: '🐕', tags: ['반려동물', '가족', '돌봄'],
+      why: '반려견 구슬이의 눈으로 가족의 하루를 바라본 그림책. 《알사탕》의 앞이야기로, 사람이 아닌 개의 시선으로 보면 가족의 사랑이 어떻게 보이는지 따뜻하게 전한다.',
+      activities: [
+        { t: 'write', title: '우리 집 동물의 하루', prompt: '우리 집 동물이나 인형의 눈으로 하루 일기를 써 보세요.' },
+        { t: 'talk', title: '무엇을 해 주고 싶나요', prompt: '반려동물이 있다면 무엇을 해 주고 싶은지, 없다면 어떤 동물과 살고 싶은지 이야기해 보세요.' },
+        { t: 'make', title: '구슬이에게 편지', prompt: '구슬이에게 하고 싶은 말을 그림과 함께 적어 보세요.' }
+      ]
+    },
+    {
+      id: 'b14', title: '엄마 사용법', author: '김성진', publisher: '창비', year: '2012',
+      isbn: '9788936451332', band: 'low', emoji: '🧸', tags: ['가족', '상상', '성장'],
+      why: '여덟 살 현수가 아빠를 졸라 조립식 생명장난감 엄마를 산 뒤, 그 엄마를 진짜 엄마로 만들어 가는 이야기. 엄마를 장난감처럼 산다는 엉뚱한 상상 속에서 가족의 의미를 되새기게 하고, 처음 긴 동화를 읽는 1~2학년에게 알맞은 분량이다.',
+      activities: [
+        { t: 'talk', title: '장난감 엄마와 진짜 엄마', prompt: '장난감 엄마와 진짜 엄마는 무엇이 다를까요? 무엇이 가장 큰 차이일까요?' },
+        { t: 'write', title: '엄마 사용 설명서', prompt: '나만의 엄마 사용 설명서를 만들어 보세요. 주의사항도 꼭 넣어 보세요.' },
+        { t: 'make', title: '우리 가족 소개 카드', prompt: '우리 가족 한 사람 한 사람을 소개하는 카드를 만들어 보세요.' }
+      ]
+    },
+    {
+      id: 'b15', title: '아홉 살 마음 사전', author: '박성우', publisher: '창비', year: '2023',
+      isbn: '9788936447014', band: 'low', emoji: '💛', tags: ['감정', '어휘', '동시'],
+      why: '서운함, 뿌듯함, 속상함처럼 이름 붙이기 어려운 마음 80가지를 동시와 그림으로 풀어낸 책. 감정에 이름을 붙이면 마음을 다루기가 쉬워져, 독후감보다 마음 어휘를 늘리는 데 좋다.',
+      activities: [
+        { t: 'write', title: '오늘의 마음 단어', prompt: '오늘 내 마음과 가장 가까운 단어를 골라 마음 일기를 써 보세요.' },
+        { t: 'make', title: '감정 카드 만들기', prompt: '가족 얼굴 그림에 감정 단어를 붙여 카드로 만들어 보세요.' },
+        { t: 'talk', title: '이 마음은 언제?', prompt: '책에서 고른 단어를 언제 느껴 봤는지 가족과 이야기해 보세요.' }
+      ]
+    },
+    {
+      id: 'b16', title: '마당을 나온 암탉', author: '황선미', publisher: '사계절', year: '2023',
+      isbn: '9788971968710', band: 'mid', emoji: '🐔', tags: ['엄마', '자유', '책임'],
+      why: '양계장을 나온 암탉 잎싹이 초록머리를 품고 엄마가 되어 가는 이야기. 꿈과 자유, 그리고 엄마가 된다는 것의 무게를 함께 담은 한국 창작동화의 대표작이다.',
+      activities: [
+        { t: 'talk', title: '잎싹의 마지막 선택', prompt: '잎싹이 마지막에 한 선택이 옳았는지, 다른 선택은 없었을지 토론해 보세요.' },
+        { t: 'write', title: '초록머리에게 편지', prompt: '자라서 엄마의 이야기를 알게 된 초록머리가 엄마에게 보내는 편지를 써 보세요.' },
+        { t: 'observe', title: '닭의 한살이', prompt: '닭이 알을 낳고 부화하는 과정을 조사해 순서도로 그려 보세요.' }
+      ]
+    },
+    {
+      id: 'b17', title: '샬롯의 거미줄', author: '엘윈 브룩스 화이트', publisher: '시공주니어', year: '2018',
+      isbn: '9788952787590', band: 'mid', emoji: '🕷️', tags: ['우정', '생명', '용기'],
+      why: '죽을 위기에 놓인 돼지 윌버를 살리려 거미 샬롯이 거미줄에 글자를 써 넣는 이야기. 우정과 희생, 생명의 소중함을 담은 세계 고전으로, 거미줄에 새겨진 글자들이 이야기를 끌고 가는 재미가 있다.',
+      activities: [
+        { t: 'make', title: '거미줄 글자', prompt: '거미줄 모양 종이에 윌버를 살릴 문장을 써 보세요. 어떤 말이 가장 힘이 셀까요?' },
+        { t: 'write', title: '고마운 친구', prompt: '친구에게 고마웠던 일 세 가지를 적어 보세요.' },
+        { t: 'observe', title: '거미줄 관찰', prompt: '거미줄의 구조와 거미가 먹이를 잡는 방법을 조사해 보세요.' }
+      ]
+    },
+    {
+      id: 'b18', title: '내 이름은 삐삐 롱스타킹', author: '아스트리드 린드그렌', publisher: '시공주니어', year: '2017',
+      isbn: '9788952785404', band: 'mid', emoji: '🧦', tags: ['자유', '우정', '모험'],
+      why: '어른 없이 산다고장에서 사는 힘센 소녀 삐삐와 이웃 아이들의 자유로운 모험. 규칙을 다르게 보는 아이의 시선이 통쾌하고, 웃음 속에서 자유와 우정을 생각하게 한다.',
+      activities: [
+        { t: 'write', title: '규칙 하나 바꾸기', prompt: '오늘 하루 우리 집 규칙 하나를 바꾼다면 무엇을 바꿀지 써 보세요.' },
+        { t: 'make', title: '빌라 빌레쿨라', prompt: '삐삐의 집 빌라 빌레쿨라를 상상해 그려 보세요.' },
+        { t: 'talk', title: '어른 없이 산다면', prompt: '어른 없이 산다면 좋은 점과 힘든 점은 무엇일까요?' }
+      ]
+    },
+    {
+      id: 'b19', title: '시간 가게', author: '이나영', publisher: '문학동네', year: '2013',
+      isbn: '9788954620260', band: 'mid', emoji: '⏳', tags: ['시간', '선택', '성장'],
+      why: '1등이 되려고 하루 10분의 시간을 사는 대신 행복한 기억을 잃어 가는 윤아의 이야기. 무엇을 얻으려고 무엇을 내놓는지, 시간과 기억의 값을 생각하게 한다.',
+      activities: [
+        { t: 'write', title: '윤아에게 보내는 편지', prompt: '1등을 그만두어도 괜찮다고 말해 주는 편지를 써 보세요.' },
+        { t: 'talk', title: '시간을 산다면', prompt: '시간을 살 수 있다면 무엇에 쓰고 싶은지 이야기해 보세요.' },
+        { t: 'observe', title: '내 하루 시간 기록', prompt: '하루 동안 무엇에 얼마만큼 시간을 썼는지 기록해 보세요.' }
+      ]
+    },
+    {
+      id: 'b20', title: '밤티 마을 큰돌이네 집', author: '이금이', publisher: '밤티', year: '2024',
+      isbn: '9791191826340', band: 'mid', emoji: '🏡', tags: ['가족', '이웃', '시골'],
+      why: '시골 마을 큰돌이네 가족의 따뜻한 일상을 담은 연작 동화의 첫 권. 가족과 이웃이 서로 기대어 사는 모습이 정겹고, 30년 넘게 읽힌 밤티 마을 이야기의 시작이다.',
+      activities: [
+        { t: 'make', title: '밤티 마을 지도', prompt: '큰돌이네 집을 중심으로 밤티 마을 지도를 그려 보세요.' },
+        { t: 'talk', title: '우리 동네 이웃', prompt: '우리 동네에서 인사 나누는 이웃과 나눈 이야기를 해 보세요.' },
+        { t: 'write', title: '우리 가족 이야기', prompt: '우리 가족만의 재미있는 이야기 한 편을 적어 보세요.' }
+      ]
+    },
+    {
+      id: 'b21', title: '기억을 파는 향기 가게', author: '신은영', publisher: '소원나무', year: '2019',
+      isbn: '9791170440147', band: 'mid', emoji: '🌸', tags: ['기억', '가족', '판타지'],
+      why: '치매를 앓는 할머니의 기억을 붙잡으려는 수향이가 골목의 K향기 가게에서 일하게 되는 이야기. 사진에 코를 대고 냄새를 맡는 할머니와 잊어 가는 기억을 붙잡으려는 마음이 뭉클하다.',
+      activities: [
+        { t: 'make', title: '기억의 향기 이름', prompt: '가족의 기억을 담은 향기 이름을 짓고 설명을 적어 보세요.' },
+        { t: 'write', title: '잊지 않고 싶은 기억', prompt: '사진 대신 글로 남기고 싶은 기억 하나를 적어 보세요.' },
+        { t: 'talk', title: '가족이 나를 잊는다면', prompt: '가족이 나를 잊어 간다면 어떤 마음일지 이야기해 보세요.' }
+      ]
+    },
+    {
+      id: 'b22', title: '몽실 언니', author: '권정생', publisher: '창비', year: '2012',
+      isbn: '9788936433895', band: 'mid', emoji: '🕯️', tags: ['역사', '가족', '삶'],
+      why: '전쟁과 가난 속에서도 동생들을 돌보며 살아낸 몽실이의 이야기. 어려운 시대를 살아낸 사람들의 삶을 통해 공감과 역사 감각을 함께 기른다.',
+      activities: [
+        { t: 'observe', title: '시대 배경 알기', prompt: '이야기가 일어난 시대에 사람들이 어떻게 살았는지 조사해 보세요.' },
+        { t: 'write', title: '몽실이에게 안부', prompt: '지금의 내가 몽실이에게 전하고 싶은 안부를 편지로 써 보세요.' },
+        { t: 'talk', title: '가장 마음 아팠던 장면', prompt: '가장 마음 아팠던 장면과 그 이유를 이야기해 보세요.' }
+      ]
+    },
+    {
+      id: 'b23', title: '5번 레인', author: '은소홀', publisher: '문학동네', year: '2020',
+      isbn: '9788954674638', band: 'high', emoji: '🏊', tags: ['성장', '우정', '스포츠'],
+      why: '수영을 잘하고 싶은 열세 살 태양이와 수영부 아이들의 성장 이야기. 잘하고 싶은 마음과 있는 그대로의 나를 받아들이는 일을 섬세하게 그린 문학동네어린이문학상 대상작이다.',
+      activities: [
+        { t: 'write', title: '나는 몇 번 레인', prompt: '나는 지금 몇 번 레인에서 헤엄치고 있는지, 나에 대해 써 보세요.' },
+        { t: 'talk', title: '태양이의 마음이 바뀐 장면', prompt: '주인공의 마음이 바뀌는 장면을 찾아 왜 바뀌었는지 이야기해 보세요.' },
+        { t: 'observe', title: '수영 경기의 규칙', prompt: '수영 종목과 레인 배정 방식, 기록 측정 방법을 알아보세요.' }
+      ]
+    },
+    {
+      id: 'b24', title: '시간을 파는 상점', author: '김선영', publisher: '자음과모음', year: '2012',
+      isbn: '9788954427173', band: 'high', emoji: '🕰️', tags: ['시간', '선택', '판타지'],
+      why: '시간을 사고파는 상점에서 아르바이트를 하게 된 소년이 손님들의 사연을 만나는 이야기. 시간을 걸고 소원을 비는 사람들을 통해 선택과 후회, 삶의 우선순위를 생각하게 한다.',
+      activities: [
+        { t: 'write', title: '상점에 온 손님', prompt: '시간 상점에 찾아온 손님 한 명의 사연을 만들어 써 보세요.' },
+        { t: 'talk', title: '내 시간의 값', prompt: '내 시간 10분을 판다면 얼마일지, 무엇과 바꾸고 싶은지 이야기해 보세요.' },
+        { t: 'make', title: '나의 인생 시계', prompt: '내 인생을 시계로 그린다면 지금은 몇 시인지, 남은 시간에 무엇을 할지 그려 보세요.' }
+      ]
+    },
+    {
+      id: 'b25', title: '모모', author: '미하엘 엔데', publisher: '비룡소', year: '2024',
+      isbn: '9788949139999', band: 'high', emoji: '🌌', tags: ['시간', '우정', '고전'],
+      why: '시간을 훔치는 회색 신사들에 맞서는 소녀 모모의 이야기. 아무것도 하지 않고 남의 이야기를 들어 주는 모모를 통해 바쁜 일상에서 잃어버린 시간과 마음의 여유를 돌아보게 한다.',
+      activities: [
+        { t: 'talk', title: '회색 신사의 정체', prompt: '회색 신사는 무엇을 상징할까요? 우리 생활에서 회색 신사 같은 것은 무엇인가요?' },
+        { t: 'write', title: '10분 들어 주기', prompt: '모모처럼 누군가의 이야기를 10분 들어 주고 느낀 점을 써 보세요.' },
+        { t: 'make', title: '시간 저축 계획', prompt: '시간을 저축할 수 있다면 무엇에 쓰고 싶은지 계획을 그려 보세요.' }
+      ]
+    },
+    {
+      id: 'b26', title: '나무를 심은 사람', author: '장 지오노', publisher: '두레', year: '2018',
+      isbn: '9788974431143', band: 'high', emoji: '🌳', tags: ['꾸준함', '자연', '고전'],
+      why: '황폐한 땅에 묵묵히 도토리를 심어 숲을 되살린 양치기 엘제아르 부피에의 이야기. 눈에 띄지 않는 꾸준함이 세상을 바꾼다는 것을 짧고 깊게 보여 주는 우화다.',
+      activities: [
+        { t: 'make', title: '30년 뒤 마을', prompt: '나무를 심은 30년 뒤 이 마을은 어떻게 변했을지 상상해 그려 보세요.' },
+        { t: 'write', title: '꾸준히 해 온 일', prompt: '내가 꾸준히 해 온 일과 앞으로 해 보고 싶은 일을 적어 보세요.' },
+        { t: 'observe', title: '우리 동네 나무', prompt: '우리 동네 나무의 이름과 잎 모양을 조사해 보세요.' }
+      ]
+    },
+    {
+      id: 'b27', title: '위저드 베이커리', author: '구병모', publisher: '창비', year: '2022',
+      isbn: '9788936434601', band: 'high', emoji: '🥐', tags: ['판타지', '욕망', '선택'],
+      why: '집을 나온 소년이 숨어든 마법 빵집 위저드 베이커리에서 벌어지는 이야기. 소원을 이루어 주는 빵과 그 대가를 둘러싼 판타지로, 욕망과 책임을 생각하게 한다. 책 읽는 힘이 붙은 고학년에게 권한다.',
+      activities: [
+        { t: 'make', title: '위저드 베이커리 메뉴판', prompt: '어떤 소원을 이루어 주는 빵인지 메뉴판으로 만들어 보세요.' },
+        { t: 'talk', title: '어떤 빵을 고르겠나요', prompt: '내가 가게에 갔다면 어떤 빵을 고를지, 그 대가는 무엇일지 이야기해 보세요.' },
+        { t: 'write', title: '다른 선택', prompt: '주인공이 다른 선택을 했다면 이야기가 어떻게 흘러갈지 이어 써 보세요.' }
+      ]
+    },
+    {
+      id: 'b28', title: '해리 포터와 마법사의 돌 1', author: 'J.K. 롤링', publisher: '문학수첩', year: '2024',
+      isbn: '9791193790403', band: 'high', emoji: '⚡', tags: ['판타지', '우정', '모험'],
+      why: '자신이 마법사임을 알게 된 해리가 호그와트에서 첫 학년을 보내는 이야기. 긴 이야기를 끝까지 읽는 힘을 기르기 좋은 시리즈 첫 권이고, 2024년 새 번역으로 문장이 한결 읽기 쉽다.',
+      activities: [
+        { t: 'make', title: '나만의 지팡이', prompt: '내 지팡이와 기숙사 문장을 디자인해 보세요.' },
+        { t: 'write', title: '입학 통지서 답장', prompt: '호그와트 입학 통지서를 받는다면 어떤 답장을 쓸지 적어 보세요.' },
+        { t: 'talk', title: '친구로 삼고 싶은 사람', prompt: '해리, 론, 헤르미온느 중 누구와 친구가 되고 싶은지 이유와 함께 이야기해 보세요.' }
+      ]
+    },
+    {
+      id: 'b29', title: '긴긴밤', author: '루리', publisher: '문학동네', year: '2021',
+      isbn: '9788954677158', band: 'high', emoji: '🌑', tags: ['우정', '상실', '연대'],
+      why: '세상에 마지막으로 남은 흰바위코뿔소 노든과 코뿔소 품에서 태어난 어린 펭귄의 이야기. 서로 다른 존재가 서로에게 기대어 긴 밤을 건너는 모습을 담담하게 그린 문학동네어린이문학상 대상작이다.',
+      activities: [
+        { t: 'write', title: '노든에게 보내는 편지', prompt: '노든에게 전하고 싶은 말을 편지로 써 보세요.' },
+        { t: 'talk', title: '곁에 있어 준다는 것', prompt: '곁에 있어 준다는 것은 어떤 일일까요? 내가 곁에 있어 준 경험을 이야기해 보세요.' },
+        { t: 'make', title: '인상 깊은 장면', prompt: '가장 인상 깊은 장면을 그림으로 남기고 그 이유를 적어 보세요.' }
+      ]
+    },
+    {
+      id: 'b30', title: '수일이와 수일이', author: '김우경', publisher: '우리교육', year: '2016',
+      isbn: '9788980408337', band: 'high', emoji: '👥', tags: ['상상', '학교', '나'],
+      why: '방학 내내 학원만 다니는 수일이가 개 덕실이의 도움으로 학원에 다닐 또 다른 수일이를 만드는 이야기. 나를 대신할 또 다른 나가 생긴다면 어떤 일이 벌어질지, 나다움과 책임을 유쾌하게 생각하게 한다.',
+      activities: [
+        { t: 'write', title: '또 다른 나에게', prompt: '또 다른 내가 생긴다면 시킬 일과 절대 시키지 않을 일을 적어 보세요.' },
+        { t: 'talk', title: '나를 대신할 존재', prompt: '나를 대신할 존재가 생기면 좋을까요? 좋은 점과 걱정되는 점을 이야기해 보세요.' },
+        { t: 'make', title: '두 수일이 비교표', prompt: '수일이와 또 다른 수일이를 비교하는 표를 그려 보세요.' }
+      ]
+    }
+  ];
+
+  // 예시(샘플) 도서관 — 부산 북구 공공도서관 7곳의 실제 주소·전화·운영시간
+  var DEMO_LIBS = [
+    { code: 'demo-hm', name: '화명도서관', address: '부산광역시 북구 화명대로12번길 59 (화명동)', tel: '051-309-6481', hours: '평일 07:00~22:00 · 토 07:00~22:00', closed: '월요일', home: 'https://www.bsbukgu.go.kr/hmlib/' },
+    { code: 'demo-gc', name: '금곡도서관', address: '부산광역시 북구 효열로203번길 34 (금곡동)', tel: '051-309-6181', hours: '평일 07:00~22:00 · 토 07:00~22:00', closed: '월요일', home: '' },
+    { code: 'demo-dc', name: '덕천도서관', address: '부산광역시 북구 의성로47번길 45-2 (덕천동)', tel: '051-309-5581', hours: '평일 09:00~22:00 · 토 09:00~18:00', closed: '월요일', home: '' },
+    { code: 'demo-md', name: '만덕도서관', address: '부산광역시 북구 은행나무로 26 (만덕동)', tel: '051-309-2097', hours: '평일 09:00~22:00 · 토 09:00~18:00', closed: '월요일', home: '' },
+    { code: 'demo-gp', name: '부산광역시립구포도서관', address: '부산광역시 북구 백양대로1016번다길 43 (구포동)', tel: '051-330-6300', hours: '평일 07:00~22:00 · 토 07:00~22:00', closed: '매월 첫째·둘째 월요일', home: '' },
+    { code: 'demo-sb', name: '솔밭도서관', address: '부산광역시 북구 금곡대로324번길 29 (화명동)', tel: '051-309-6178', hours: '평일 09:00~18:00 · 토 09:00~18:00', closed: '월요일', home: '' },
+    { code: 'demo-sh', name: '상학도서관', address: '부산광역시 북구 상학산복길 215 (만덕동)', tel: '051-309-6177', hours: '평일 09:00~18:00 · 토 09:00~18:00', closed: '월요일', home: '' }
+  ];
+
+  var REGIONS = [
+    { code: '11', name: '서울' }, { code: '21', name: '부산' }, { code: '22', name: '대구' },
+    { code: '23', name: '인천' }, { code: '24', name: '광주' }, { code: '25', name: '대전' },
+    { code: '26', name: '울산' }, { code: '29', name: '세종' }, { code: '31', name: '경기' },
+    { code: '32', name: '강원' }, { code: '33', name: '충북' }, { code: '34', name: '충남' },
+    { code: '35', name: '전북' }, { code: '36', name: '전남' }, { code: '37', name: '경북' },
+    { code: '38', name: '경남' }, { code: '39', name: '제주' }
+  ];
+
+  function regionName(code) {
+    for (var i = 0; i < REGIONS.length; i++) { if (REGIONS[i].code === code) return REGIONS[i].name; }
+    return '';
+  }
+
+  /* ============================================================
+     2. 상태 저장
+     ============================================================ */
+
+  function freshState() {
+    return {
+      v: 1,
+      profile: { name: '', goal: 40 },
+      reading: {},
+      logs: [],
+      custom: [],
+      settings: { apiKey: '', kakaoKey: '', region: '21', dtlRegion: '' },
+      ui: { tab: 'books', band: 'all', q: '', libBookId: '' }
+    };
+  }
+
+  function loadState() {
+    var s = freshState();
+    try {
+      var raw = window.localStorage.getItem(STORE_KEY);
+      if (!raw) return s;
+      var saved = JSON.parse(raw);
+      if (!saved || typeof saved !== 'object') return s;
+      s.profile = Object.assign(s.profile, saved.profile || {});
+      s.reading = saved.reading || {};
+      s.logs = Array.isArray(saved.logs) ? saved.logs : [];
+      s.custom = Array.isArray(saved.custom) ? saved.custom : [];
+      s.settings = Object.assign(s.settings, saved.settings || {});
+      s.ui = Object.assign(s.ui, saved.ui || {});
+      return s;
+    } catch (e) {
+      return s;
+    }
+  }
+
+  var state = loadState();
+
+  function saveState() {
+    try { window.localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* 저장 불가 환경 무시 */ }
+  }
+
+  /* ============================================================
+     3. 유틸
+     ============================================================ */
+
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $$(sel, root) {
+    var list = (root || document).querySelectorAll(sel);
+    return Array.prototype.slice.call(list || []);
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function todayISO() {
+    var d = new Date();
+    var m = String(d.getMonth() + 1); if (m.length < 2) m = '0' + m;
+    var day = String(d.getDate()); if (day.length < 2) day = '0' + day;
+    return d.getFullYear() + '-' + m + '-' + day;
+  }
+
+  function thisMonth() { return todayISO().slice(0, 7); }
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    var p = iso.split('-');
+    if (p.length < 3) return iso;
+    return p[0] + '.' + p[1] + '.' + p[2];
+  }
+
+  function uid(prefix) {
+    return (prefix || 'x') + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  function digitsOnly(s) { return String(s || '').replace(/[^0-9Xx]/g, '').toUpperCase(); }
+
+  // ISBN-13 체크 디지트 검사
+  function isValidISBN13(code) {
+    var s = digitsOnly(code);
+    if (s.length !== 13) return false;
+    var sum = 0;
+    for (var i = 0; i < 12; i++) {
+      var d = parseInt(s.charAt(i), 10);
+      if (isNaN(d)) return false;
+      sum += d * (i % 2 === 0 ? 1 : 3);
+    }
+    var check = (10 - (sum % 10)) % 10;
+    return check === parseInt(s.charAt(12), 10);
+  }
+
+  function isBookBarcode(code) {
+    var s = digitsOnly(code);
+    return s.length === 13 && (s.indexOf('978') === 0 || s.indexOf('979') === 0) && isValidISBN13(s);
+  }
+
+  function hashStr(s) {
+    var h = 2166136261;
+    for (var i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    return h >>> 0;
+  }
+
+  function coverStyle(book) {
+    var idx = 0;
+    for (var i = 0; i < BOOKS.length; i++) { if (BOOKS[i].id === book.id) { idx = i; break; } }
+    if (book.band === 'etc') idx = idx + 3;
+    var pair = COVER_COLORS[idx % COVER_COLORS.length];
+    return '--cs1:' + pair[0] + ';--cs2:' + pair[1];
+  }
+
+  function toast(msg) {
+    var el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('is-on');
+    if (toast._t) clearTimeout(toast._t);
+    toast._t = setTimeout(function () { el.classList.remove('is-on'); }, 2100);
+  }
+
+  /* ============================================================
+     4. 책 목록 계산
+     ============================================================ */
+
+  // 바코드로 찾은 책을 도서관 탭에서 바로 조회할 때만 쓰는 임시 책(저장하지 않음)
+  var transientBook = null;
+
+  function allBooks() {
+    return BOOKS.concat(state.custom || []);
+  }
+
+  function getBook(id) {
+    var list = allBooks();
+    for (var i = 0; i < list.length; i++) { if (list[i].id === id) return list[i]; }
+    if (transientBook && transientBook.id === id) return transientBook;
+    return null;
+  }
+
+  function selectableBooks() {
+    var list = allBooks();
+    if (transientBook) {
+      var exists = false;
+      for (var i = 0; i < list.length; i++) { if (list[i].id === transientBook.id) exists = true; }
+      if (!exists) list = list.concat([transientBook]);
+    }
+    return list;
+  }
+
+  function isRead(id) {
+    var r = state.reading[id];
+    return !!(r && r.done);
+  }
+
+  function filterBooks() {
+    var q = (state.ui.q || '').trim().toLowerCase();
+    var band = state.ui.band || 'all';
+    return allBooks().filter(function (b) {
+      if (band !== 'all' && b.band !== band) return false;
+      if (!q) return true;
+      var hay = (b.title + ' ' + b.author + ' ' + b.publisher + ' ' + (b.isbn || '') + ' ' + (b.tags || []).join(' ')).toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+  }
+
+  function computeStats() {
+    var done = allBooks().filter(function (b) { return isRead(b.id); });
+    var byBand = { preschool: 0, low: 0, mid: 0, high: 0, etc: 0 };
+    var month = 0;
+    for (var i = 0; i < done.length; i++) {
+      var b = done[i];
+      var k = byBand[b.band] === undefined ? 'etc' : b.band;
+      byBand[k] = (byBand[k] || 0) + 1;
+      var r = state.reading[b.id];
+      if (r && r.finishedAt && r.finishedAt.slice(0, 7) === thisMonth()) month++;
+    }
+    var goal = parseInt(state.profile.goal, 10);
+    if (isNaN(goal) || goal < 0) goal = 0;
+    var total = done.length;
+    var pct = goal > 0 ? Math.min(100, Math.round((total / goal) * 100)) : 0;
+    return {
+      total: total, byBand: byBand, thisMonth: month, goal: goal, pct: pct,
+      remaining: goal > total ? goal - total : 0,
+      readIds: done.map(function (b) { return b.id; })
+    };
+  }
+
+  function logsFor(bookId) {
+    return (state.logs || []).filter(function (l) { return l.bookId === bookId; });
+  }
+
+  /* ============================================================
+     5. 렌더 — 추천도서
+     ============================================================ */
+
+  function renderBooksShell() {
+    var el = document.getElementById('tab-books');
+    if (!el) return;
+    el.innerHTML =
+      '<div class="pad">' +
+        '<h1 class="h1">추천도서</h1>' +
+        '<p class="sub">사서추천·교과 수록·아동문학상 수상작 가운데 골랐어요. 읽은 책은 체크하고, 독후활동까지 이어서 해 보세요.</p>' +
+        '<div class="searchbox">' +
+          '<span class="ico">🔍</span>' +
+          '<input id="q" type="search" inputmode="search" autocomplete="off" placeholder="제목·저자·출판사로 찾기" aria-label="도서 검색" value="' + esc(state.ui.q) + '">' +
+        '</div>' +
+        '<div class="chips" id="bandChips" role="tablist" aria-label="연령 필터"></div>' +
+        '<div class="list-head"><span id="booksCount"></span><span id="readCount"></span></div>' +
+        '<div id="booksList"></div>' +
+        '<p class="note">서지 정보(출판사·ISBN)는 교보문고 도서 정보 기준으로 2026년 11월에 확인했어요. 책마다 판본이 여러 개일 수 있으니, 도서관에서 찾을 때는 ISBN으로 확인해 보세요.</p>' +
+      '</div>';
+    renderBandChips();
+    updateBooksList();
+  }
+
+  function renderBandChips() {
+    var wrap = document.getElementById('bandChips');
+    if (!wrap) return;
+    var opts = [{ k: 'all', label: '전체' }];
+    for (var i = 0; i < BANDS.length; i++) opts.push({ k: BANDS[i], label: BAND_LABEL[BANDS[i]] });
+    var html = '';
+    for (var j = 0; j < opts.length; j++) {
+      var on = (state.ui.band || 'all') === opts[j].k;
+      html += '<button class="chip' + (on ? ' is-on' : '') + '" role="tab" aria-selected="' + (on ? 'true' : 'false') +
+              '" data-act="setBand" data-band="' + opts[j].k + '">' + esc(opts[j].label) + '</button>';
+    }
+    wrap.innerHTML = html;
+  }
+
+  var expandedWhy = {};
+
+  function bookCard(b) {
+    var read = isRead(b.id);
+    var logs = logsFor(b.id);
+    var openWhy = !!expandedWhy[b.id];
+    var rating = 0;
+    if (state.reading[b.id] && state.reading[b.id].rating) rating = state.reading[b.id].rating;
+    var stars = '';
+    if (rating > 0) {
+      for (var i = 0; i < 5; i++) stars += (i < rating ? '★' : '☆');
+    }
+    return '' +
+      '<article class="book' + (read ? ' is-read' : '') + '" data-id="' + esc(b.id) + '">' +
+        '<div class="cover" style="' + coverStyle(b) + '" aria-hidden="true">' + (b.emoji || '📗') + '</div>' +
+        '<div class="book-main">' +
+          '<div class="book-top">' +
+            '<h3 class="book-title">' + esc(b.title) + '</h3>' +
+            '<span class="band ' + (BAND_CLASS[b.band] || 'band-p0') + '">' + esc(BAND_LABEL[b.band] || '기타') + '</span>' +
+          '</div>' +
+          '<p class="book-meta">' + esc(b.author) + ' · ' + esc(b.publisher) + ' · ' + esc(b.year) + '</p>' +
+          '<p class="book-why' + (openWhy ? '' : ' clamp') + '">' + esc(b.why) + '</p>' +
+          '<button class="more" data-act="toggleWhy" data-id="' + esc(b.id) + '">' + (openWhy ? '접기' : '추천 이유 더보기') + '</button>' +
+          (b.tags && b.tags.length ? '<p class="book-tags">' + b.tags.map(function (t) { return '#' + esc(t); }).join(' ') + '</p>' : '') +
+          '<div class="book-actions">' +
+            '<button class="btn btn-xs ' + (read ? 'btn-on' : 'btn-ghost') + '" data-act="toggleRead" data-id="' + esc(b.id) + '">' +
+              (read ? '✓ 읽었어요' : '읽음 체크') + '</button>' +
+            '<button class="btn btn-xs btn-ghost" data-act="gotoLibrary" data-id="' + esc(b.id) + '">🏛 대여 확인</button>' +
+            '<button class="btn btn-xs btn-soft" data-act="openActivity" data-id="' + esc(b.id) + '">✏️ 독후활동' +
+              (logs.length ? ' ' + logs.length : '') + '</button>' +
+          '</div>' +
+          (stars ? '<p class="book-tags" style="color:#c98a2c;margin:8px 0 0">' + stars + '</p>' : '') +
+          '<p class="isbn">ISBN ' + esc(b.isbn || '없음') + (b.pages ? ' · ' + b.pages + '쪽' : '') + '</p>' +
+        '</div>' +
+      '</article>';
+  }
+
+  function updateBooksList() {
+    var listEl = document.getElementById('booksList');
+    if (!listEl) return;
+    var list = filterBooks();
+    var stats = computeStats();
+    if (!list.length) {
+      listEl.innerHTML = '<div class="empty"><span class="em">🔎</span>' +
+        (state.ui.q ? '“' + esc(state.ui.q) + '”에 맞는 책을 찾지 못했어요.<br>다른 낱말로 찾아보세요.' : '이 연령대의 책이 아직 없어요.') +
+        '</div>';
+    } else {
+      listEl.innerHTML = list.map(bookCard).join('');
+    }
+    var countEl = document.getElementById('booksCount');
+    if (countEl) countEl.innerHTML = '전체 <b>' + allBooks().length + '권</b> 중 ' + list.length + '권 보는 중';
+    var readEl = document.getElementById('readCount');
+    if (readEl) readEl.innerHTML = '읽은 책 <b>' + stats.total + '권</b>';
+    updateBrandSub();
+  }
+
+  function updateBrandSub() {
+    var el = document.getElementById('brandSub');
+    if (!el) return;
+    var s = computeStats();
+    var name = (state.profile.name || '').trim();
+    var who = name ? name + ' · ' : '';
+    el.textContent = who + s.total + '권 읽음 · 목표 ' + (s.goal > 0 ? s.goal + '권' : '미설정');
+  }
+
+  /* ============================================================
+     6. 렌더 — 도서관
+     ============================================================ */
+
+  function renderLibrary() {
+    var el = document.getElementById('tab-library');
+    if (!el) return;
+    var books = selectableBooks();
+    var selected = (state.ui.libBookId && getBook(state.ui.libBookId)) ? state.ui.libBookId : (books.length ? books[0].id : '');
+    if (selected !== state.ui.libBookId) { state.ui.libBookId = selected; saveState(); }
+    var book = getBook(selected);
+    var opts = books.map(function (b) {
+      return '<option value="' + esc(b.id) + '"' + (b.id === selected ? ' selected' : '') + '>' +
+        esc(b.title) + ' — ' + esc(b.author) + '</option>';
+    }).join('');
+    var regionOpts = REGIONS.map(function (r) {
+      return '<option value="' + r.code + '"' + (state.settings.region === r.code ? ' selected' : '') + '>' + r.name + '</option>';
+    }).join('');
+    var hasKey = !!(state.settings.apiKey || '').trim();
+
+    el.innerHTML =
+      '<div class="pad">' +
+        '<h1 class="h1">도서관 대여 확인</h1>' +
+        '<p class="sub">이 책이 어느 도서관에 있고, 지금 빌릴 수 있는지 확인해요.</p>' +
+        '<div class="card">' +
+          '<h2 class="card-title">📖 어떤 책인가요?</h2>' +
+          '<div class="field">' +
+            '<label class="label" for="libBook">책 선택</label>' +
+            '<select class="select" id="libBook">' + opts + '</select>' +
+          '</div>' +
+          '<div class="field">' +
+            '<label class="label" for="dtlRegion">지역</label>' +
+            '<div class="row2">' +
+              '<select class="select" id="regionSel" aria-label="시·도">' + regionOpts + '</select>' +
+              '<input class="input" id="dtlRegion" inputmode="numeric" maxlength="5" placeholder="시·군·구 코드(선택)" value="' + esc(state.settings.dtlRegion) + '" aria-label="시군구 코드">' +
+            '</div>' +
+            '<p class="hint">시·군·구 5자리 코드를 넣으면 더 좁혀서 찾아요. 모르면 비워 두세요. 예: 부산 북구는 도서관 정보나루 코드표에서 확인할 수 있어요.</p>' +
+          '</div>' +
+          (book ? '<p class="hint" style="margin-top:-2px">선택한 책 ISBN <b>' + esc(book.isbn || '없음') + '</b></p>' : '') +
+          '<div class="btns">' +
+            '<button class="btn btn-primary" data-act="lookupHolding"' + (hasKey ? '' : ' disabled') + '>🔎 실제 대출 조회</button>' +
+            '<button class="btn btn-ghost" data-act="demoHolding">예시 보기</button>' +
+          '</div>' +
+          '<div class="btns" style="margin-top:8px">' +
+            '<button class="btn btn-ghost btn-xs" data-act="listLibraries">🏛 우리 지역 도서관 운영시간 보기</button>' +
+          '</div>' +
+          (hasKey ? '' : '<p class="hint">실제 조회는 설정에서 도서관 정보나루 인증키를 넣으면 켜져요. 지금은 예시 화면으로 미리 볼 수 있어요.</p>') +
+        '</div>' +
+        '<div id="holdingResult"></div>' +
+        '<div class="card">' +
+          '<h2 class="card-title">🔗 바로가기</h2>' +
+          '<div class="btns" style="flex-direction:column">' +
+            '<button class="btn btn-ghost btn-xs" data-act="openNaru">🔎 정보나루에서 이 책 찾기</button>' +
+            '<button class="btn btn-ghost btn-xs" data-act="copyTitle">📋 책 제목 복사</button>' +
+            '<button class="btn btn-ghost btn-xs" data-act="openBusan">🏛 부산 도서관포털 통합검색 열기</button>' +
+          '</div>' +
+          '<p class="hint">부산 도서관포털은 통합검색 화면으로 열려요. 복사한 제목을 붙여넣어 확인해 보세요. 화명·금곡·덕천·만덕·구포·솔밭·상학도서관이 여기서 검색돼요.</p>' +
+        '</div>' +
+        '<p class="note">도서관 정보나루의 대출 가능 여부는 <b>조회일 기준 전날 대출 상태</b>예요. 방문 전에 도서관 홈페이지나 전화로 한 번 더 확인하는 게 안전해요.</p>' +
+      '</div>';
+    renderHoldingResultFromState();
+  }
+
+  function currentLibBook() {
+    return getBook(state.ui.libBookId || '');
+  }
+
+  function lookupUrl(isbn) {
+    if (!isbn) return '';
+    return 'https://data4library.kr/api/libSrchByBook?authKey=' + encodeURIComponent((state.settings.apiKey || '').trim()) +
+      '&isbn=' + encodeURIComponent(isbn) +
+      '&region=' + encodeURIComponent(state.settings.region || '21') +
+      (state.settings.dtlRegion ? '&dtl_region=' + encodeURIComponent(state.settings.dtlRegion) : '') +
+      '&pageNo=1&pageSize=20&format=json';
+  }
+
+  function existUrl(libCode, isbn) {
+    return 'https://data4library.kr/api/bookExist?authKey=' + encodeURIComponent((state.settings.apiKey || '').trim()) +
+      '&libCode=' + encodeURIComponent(libCode) + '&isbn13=' + encodeURIComponent(isbn) + '&format=json';
+  }
+
+  /* --- 응답 파싱(중첩 구조가 달라도 견디도록 재귀 탐색) --- */
+  function collectObjects(node, out, depth) {
+    if (!node || typeof node !== 'object' || depth > 8) return out;
+    if (Array.isArray(node)) {
+      for (var i = 0; i < node.length; i++) collectObjects(node[i], out, depth + 1);
+      return out;
+    }
+    out.push(node);
+    for (var k in node) {
+      if (Object.prototype.hasOwnProperty.call(node, k)) collectObjects(node[k], out, depth + 1);
+    }
+    return out;
+  }
+
+  function pickField(obj, names) {
+    for (var i = 0; i < names.length; i++) {
+      if (obj[names[i]] !== undefined && obj[names[i]] !== null && obj[names[i]] !== '') return obj[names[i]];
+    }
+    return '';
+  }
+
+  function parseLibsByBook(json) {
+    var objs = collectObjects(json, [], 0);
+    var libs = [];
+    var seen = {};
+    for (var i = 0; i < objs.length; i++) {
+      var o = objs[i];
+      var name = pickField(o, ['libName', 'libname', 'libraryName']);
+      if (!name) continue;
+      var code = String(pickField(o, ['libCode', 'libcode', 'libraryCode']) || name);
+      if (seen[code]) continue;
+      seen[code] = true;
+      libs.push({
+        code: code,
+        name: String(name),
+        address: String(pickField(o, ['address', 'addr', 'libAddress'])),
+        tel: String(pickField(o, ['tel', 'phone', 'libTel'])),
+        homepage: String(pickField(o, ['homepage', 'homePage', 'libHomepage'])),
+        closed: String(pickField(o, ['closed', 'closeDay', 'closedDay'])),
+        hours: String(pickField(o, ['operatingTime', 'openingTime', 'openTime'])),
+        lat: String(pickField(o, ['latitude', 'lat'])),
+        lng: String(pickField(o, ['longitude', 'lng']))
+      });
+    }
+    return libs;
+  }
+
+  function parseBookExist(json) {
+    var objs = collectObjects(json, [], 0);
+    for (var i = 0; i < objs.length; i++) {
+      var o = objs[i];
+      if (o.hasBook !== undefined || o.loanAvailable !== undefined) {
+        var calls = [];
+        var cn = o.callNumbers || o.callNumber;
+        if (Array.isArray(cn)) {
+          for (var j = 0; j < cn.length; j++) {
+            var c = cn[j];
+            if (typeof c === 'string') calls.push(c);
+            else if (c && c.callNumber) calls.push(String(c.callNumber));
+          }
+        } else if (typeof cn === 'string' && cn) {
+          calls.push(cn);
+        }
+        return {
+          hasBook: String(o.hasBook || '') === 'Y',
+          loanAvailable: String(o.loanAvailable || '') === 'Y',
+          callNumbers: calls
+        };
+      }
+    }
+    return null;
+  }
+
+  function stripTags(s) { return String(s || '').replace(/<[^>]*>/g, '').trim(); }
+
+  function parseKakao(json) {
+    if (!json || !json.documents || !json.documents.length) return null;
+    var d = json.documents[0];
+    var title = stripTags(d.title);
+    if (!title) return null;
+    var isbn13 = '';
+    var parts = String(d.isbn || '').split(' ');
+    for (var i = 0; i < parts.length; i++) { if (parts[i].replace(/[^0-9]/g, '').length === 13) isbn13 = parts[i].replace(/[^0-9]/g, ''); }
+    return {
+      title: title,
+      author: (d.authors || []).join(', '),
+      publisher: d.publisher || '',
+      year: String(d.datetime || '').slice(0, 4),
+      isbn: isbn13,
+      source: '카카오 책 검색'
+    };
+  }
+
+  function parseGoogleBooks(json) {
+    if (!json || !json.items || !json.items.length) return null;
+    var v = json.items[0].volumeInfo || {};
+    if (!v.title) return null;
+    return {
+      title: v.title + (v.subtitle ? ' ' + v.subtitle : ''),
+      author: (v.authors || []).join(', '),
+      publisher: v.publisher || '',
+      year: (v.publishedDate || '').slice(0, 4),
+      source: 'Google Books'
+    };
+  }
+
+  function parseOpenLibrary(json) {
+    if (!json || !json.title) return null;
+    var pub = json.publishers && json.publishers.length ? json.publishers[0] : '';
+    if (pub && typeof pub === 'object') pub = pub.name || '';
+    return {
+      title: json.title + (json.subtitle ? ' ' + json.subtitle : ''),
+      author: '',
+      publisher: pub,
+      year: String(json.publish_date || '').match(/\d{4}/) ? String(json.publish_date).match(/\d{4}/)[0] : '',
+      source: 'Open Library'
+    };
+  }
+
+  function demoScreen(book) {
+    var rows = DEMO_LIBS.map(function (lib) {
+      var h = hashStr((book.isbn || '') + '|' + lib.name);
+      var r = h % 10;
+      var st = r < 5 ? 'ok' : (r < 8 ? 'out' : 'q');
+      return { lib: lib, st: st };
+    });
+    return rows;
+  }
+
+  var holdingView = { mode: '', bookId: '', rows: [], error: '', loading: false, note: '' };
+
+  function renderHoldingResultFromState() {
+    var el = document.getElementById('holdingResult');
+    if (!el) return;
+    var book = currentLibBook();
+    if (!holdingView.mode) { el.innerHTML = ''; return; }
+    if (holdingView.loading) {
+      el.innerHTML = '<div class="card"><p class="hint" style="margin:0">도서관을 찾는 중이에요…</p></div>';
+      return;
+    }
+    var html = '';
+    if (holdingView.error) {
+      html += '<div class="error-card"><b>조회하지 못했어요</b>' + esc(holdingView.error) +
+        '<div style="margin-top:8px"><button class="btn btn-xs btn-ghost" data-act="openNaru">정보나루에서 직접 찾기</button> ' +
+        '<button class="btn btn-xs btn-ghost" data-act="demoHolding">예시 화면 보기</button></div></div>';
+    }
+    if (holdingView.mode === 'demo') {
+      html += '<div class="demo-banner"><span>🧪</span><span><b>예시 화면이에요.</b> 실제 대출 현황이 아니라 화면을 미리 보여 드리는 것입니다. 인증키를 넣으면 진짜 조회가 됩니다.</span></div>';
+    }
+    if (holdingView.mode !== '' && !holdingView.error) {
+      var headTitle = holdingView.mode === 'libs'
+        ? '🏛 ' + esc(regionName(state.settings.region)) + ' 도서관 목록'
+        : '🏛 ' + esc(book ? book.title : '') + (holdingView.mode === 'live' ? ' 소장 도서관' : ' 주변 도서관 예시');
+      html += '<div class="card"><h2 class="card-title">' + headTitle + '</h2>';
+      if (holdingView.sub) html += '<p class="hint" style="margin:-4px 0 10px">' + esc(holdingView.sub) + '</p>';
+      if (!holdingView.rows.length) {
+        html += '<div class="empty" style="padding:20px 8px"><span class="em">🌾</span>이 지역에서 소장 도서관을 찾지 못했어요.<br>지역을 넓히거나 정보나루에서 직접 검색해 보세요.</div>';
+      } else {
+        holdingView.rows.forEach(function (row) {
+          var lib = row.lib;
+          var badge = '';
+          if (holdingView.mode === 'libs') {
+            badge = '';
+          } else if (holdingView.mode === 'demo') {
+            badge = row.st === 'ok' ? '<span class="badge badge-ok">대출 가능</span>' :
+              (row.st === 'out' ? '<span class="badge badge-out">대출 중</span>' : '<span class="badge badge-q">확인 필요</span>');
+          } else if (row.checked) {
+            badge = row.loanAvailable ? '<span class="badge badge-ok">대출 가능</span>' :
+              (row.hasBook ? '<span class="badge badge-out">대출 중</span>' : '<span class="badge badge-q">소장 정보 없음</span>');
+          } else {
+            badge = '<span class="badge badge-q">소장</span>';
+          }
+          html += '<div class="libitem">' +
+            '<div class="lib-head"><span class="lib-name">' + esc(lib.name) + '</span>' + badge + '</div>' +
+            '<div class="lib-meta">' + esc(lib.address || '') +
+              (lib.tel ? '<br>☎ <a href="tel:' + esc(lib.tel.replace(/[^0-9-]/g, '')) + '">' + esc(lib.tel) + '</a>' : '') +
+              (lib.hours ? '<br>🕒 ' + esc(lib.hours) : '') +
+              (lib.closed ? ' · 휴관 ' + esc(lib.closed) : '') +
+              (lib.homepage ? '<br><a href="' + esc(lib.homepage) + '" target="_blank" rel="noreferrer">홈페이지</a>' : '') +
+              (row.checked && row.calls && row.calls.length ? '<br>청구기호 ' + esc(row.calls[0]) : '') +
+            '</div>' +
+          '</div>';
+        });
+      }
+      html += '</div>';
+    }
+    el.innerHTML = html;
+  }
+
+  /* ============================================================
+     7. 렌더 — 바코드
+     ============================================================ */
+
+  var scanView = { status: 'idle', message: '', found: null, isbn: '', busy: false, error: '' };
+  var scanner = null;
+
+  var BARCODE_SVG = '<svg viewBox="0 0 240 70" role="img" aria-label="바코드 그림">' +
+    '<rect x="0" y="0" width="240" height="70" fill="none"></rect>' +
+    '<g fill="#e9e4d6">' +
+    '<rect x="8" y="8" width="4" height="46"></rect><rect x="16" y="8" width="2" height="46"></rect>' +
+    '<rect x="22" y="8" width="6" height="46"></rect><rect x="32" y="8" width="2" height="46"></rect>' +
+    '<rect x="38" y="8" width="4" height="46"></rect><rect x="46" y="8" width="8" height="46"></rect>' +
+    '<rect x="58" y="8" width="2" height="46"></rect><rect x="64" y="8" width="4" height="46"></rect>' +
+    '<rect x="72" y="8" width="2" height="46"></rect><rect x="78" y="8" width="6" height="46"></rect>' +
+    '<rect x="88" y="8" width="4" height="46"></rect><rect x="96" y="8" width="2" height="46"></rect>' +
+    '<rect x="102" y="8" width="8" height="46"></rect><rect x="114" y="8" width="2" height="46"></rect>' +
+    '<rect x="120" y="8" width="4" height="46"></rect><rect x="128" y="8" width="6" height="46"></rect>' +
+    '<rect x="138" y="8" width="2" height="46"></rect><rect x="144" y="8" width="4" height="46"></rect>' +
+    '<rect x="152" y="8" width="8" height="46"></rect><rect x="164" y="8" width="2" height="46"></rect>' +
+    '<rect x="170" y="8" width="6" height="46"></rect><rect x="180" y="8" width="4" height="46"></rect>' +
+    '<rect x="188" y="8" width="2" height="46"></rect><rect x="194" y="8" width="6" height="46"></rect>' +
+    '<rect x="204" y="8" width="2" height="46"></rect><rect x="210" y="8" width="4" height="46"></rect>' +
+    '<rect x="218" y="8" width="8" height="46"></rect><rect x="230" y="8" width="2" height="46"></rect>' +
+    '</g>' +
+    '<text x="120" y="64" fill="#cfc9bb" font-size="9" text-anchor="middle" font-family="monospace">9 791170 283836</text>' +
+  '</svg>';
+
+  function renderScan() {
+    var el = document.getElementById('tab-scan');
+    if (!el) return;
+    el.innerHTML =
+      '<div class="pad">' +
+        '<h1 class="h1">바코드로 책 등록</h1>' +
+        '<p class="sub">책 뒤표지의 ISBN 바코드를 찍으면 서지 정보를 찾아 내 책장에 담아요.</p>' +
+        '<div class="card">' +
+          '<h2 class="card-title">📷 카메라로 스캔</h2>' +
+          '<div class="scan-frame" id="scanFrame"><div id="reader"></div>' +
+            '<div class="scan-mock" id="scanMock">' + BARCODE_SVG + '<div>EAN-13 바코드를 비추면 자동으로 읽어요</div></div>' +
+          '</div>' +
+          '<div class="btns" style="margin-top:10px">' +
+            '<button class="btn btn-primary" data-act="startScan">스캔 시작</button>' +
+            '<button class="btn btn-ghost" data-act="stopScan">멈추기</button>' +
+          '</div>' +
+          '<div id="scanStatus">' + scanStatusHtml() + '</div>' +
+        '</div>' +
+        '<div class="card">' +
+          '<h2 class="card-title">⌨️ ISBN 직접 입력</h2>' +
+          '<div class="field">' +
+            '<label class="label" for="manualIsbn">ISBN-13 (숫자 13자리)</label>' +
+            '<input class="input" id="manualIsbn" inputmode="numeric" autocomplete="off" placeholder="예: 9791170283836" value="' + esc(scanView.isbn) + '">' +
+          '</div>' +
+          '<div class="btns"><button class="btn btn-primary" data-act="lookupIsbn">서지 정보 찾기</button></div>' +
+        '</div>' +
+        '<div id="scanResult">' + scanResultHtml() + '</div>' +
+        '<div class="card">' +
+          '<h2 class="card-title">✍️ 직접 입력해서 등록</h2>' +
+          '<div class="field"><label class="label" for="cTitle">제목 *</label><input class="input" id="cTitle" placeholder="책 제목"></div>' +
+          '<div class="row2" style="margin-bottom:11px">' +
+            '<div class="field" style="margin:0"><label class="label" for="cAuthor">저자</label><input class="input" id="cAuthor" placeholder="저자"></div>' +
+            '<div class="field" style="margin:0"><label class="label" for="cPublisher">출판사</label><input class="input" id="cPublisher" placeholder="출판사"></div>' +
+          '</div>' +
+          '<div class="row2" style="margin-bottom:11px">' +
+            '<div class="field" style="margin:0"><label class="label" for="cBand">연령</label>' +
+              '<select class="select" id="cBand">' +
+                '<option value="preschool">미취학</option><option value="low">초1~2</option>' +
+                '<option value="mid">초3~4</option><option value="high">초5~6</option>' +
+                '<option value="etc">기타</option>' +
+              '</select></div>' +
+              '<div class="field" style="margin:0"><label class="label" for="cIsbn">ISBN</label><input class="input" id="cIsbn" inputmode="numeric" placeholder="선택" value="' + esc(scanView.found ? '' : (scanView.isbn || '')) + '"></div>' +
+          '</div>' +
+          '<div class="btns"><button class="btn btn-soft" data-act="addCustom">＋ 내 책장에 등록</button></div>' +
+          '<p class="hint">카메라는 휴대폰에서 https 주소로 열 때 동작해요. 파일로 바로 열었다면 ISBN 직접 입력을 써 주세요.</p>' +
+        '</div>' +
+        '<p class="note">서지 조회는 카카오 책 검색(키가 있을 때) → Google Books → 도서관 정보나루(키가 있을 때) → Open Library 순서로 시도해요. 한글 도서는 외국 서비스에 정보가 없을 수 있어, 그때는 직접 입력하면 됩니다. 입력한 ISBN은 직접 등록 화면에 그대로 남아 있어요.</p>' +
+      '</div>';
+    var hasReader = document.getElementById('reader');
+    if (hasReader) hasReader.hidden = !(scanView.status === 'on');
+    var mock = document.getElementById('scanMock');
+    if (mock) mock.hidden = (scanView.status === 'on');
+  }
+
+  function scanStatusHtml() {
+    if (scanView.status === 'on') return '<p class="hint">카메라가 켜졌어요. 바코드를 사각형 안에 맞춰 주세요.</p>';
+    if (scanView.status === 'error') return '<div class="error-card" style="margin-top:10px"><b>카메라를 켜지 못했어요</b>' + esc(scanView.message) + '</div>';
+    return '<p class="hint">스캔을 시작하면 카메라 권한을 물어봐요. 허용해 주세요.</p>';
+  }
+
+  function scanResultHtml() {
+    if (scanView.busy) return '<div class="card"><p class="hint" style="margin:0">서지 정보를 찾는 중이에요…</p></div>';
+    if (scanView.error) {
+      return '<div class="card"><div class="error-card"><b>찾지 못했어요</b>' + esc(scanView.error) +
+        '<div style="margin-top:6px">아래 “직접 입력해서 등록”에 제목을 적어 책장에 담아 주세요.</div></div></div>';
+    }
+    if (!scanView.found) return '';
+    var b = scanView.found;
+    return '<div class="card">' +
+      '<h2 class="card-title">📗 찾은 책</h2>' +
+      '<div class="book" style="margin-bottom:10px;box-shadow:none">' +
+        '<div class="cover" style="' + coverStyle({ id: '', band: b.band || 'etc' }) + '" aria-hidden="true">📗</div>' +
+        '<div class="book-main">' +
+          '<div class="book-top"><h3 class="book-title">' + esc(b.title) + '</h3>' +
+            '<span class="band ' + (BAND_CLASS[b.band] || 'band-p0') + '">' + esc(BAND_LABEL[b.band] || '기타') + '</span></div>' +
+          '<p class="book-meta">' + esc(b.author || '저자 미상') + ' · ' + esc(b.publisher || '출판사 미상') + (b.year ? ' · ' + esc(b.year) : '') + '</p>' +
+          '<p class="isbn">ISBN ' + esc(b.isbn) + ' · ' + esc(b.source || '') + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="field"><label class="label" for="foundBand">연령</label>' +
+        '<select class="select" id="foundBand">' +
+          '<option value="preschool">미취학</option><option value="low">초1~2</option>' +
+          '<option value="mid">초3~4</option><option value="high">초5~6</option>' +
+          '<option value="etc" selected>기타</option>' +
+        '</select></div>' +
+      '<div class="btns">' +
+        '<button class="btn btn-primary" data-act="addFound">＋ 내 책장에 담기</button>' +
+        '<button class="btn btn-ghost" data-act="checkFound">🏛 대출 확인</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ============================================================
+     8. 렌더 — 내 책장
+     ============================================================ */
+
+  function renderShelf() {
+    var el = document.getElementById('tab-shelf');
+    if (!el) return;
+    var s = computeStats();
+    var ringLen = 326.7;
+    var offset = ringLen * (1 - s.pct / 100);
+    var maxBand = 1;
+    for (var i = 0; i < BANDS.length; i++) { if (s.byBand[BANDS[i]] > maxBand) maxBand = s.byBand[BANDS[i]]; }
+
+    var bars = BANDS.map(function (b) {
+      var n = s.byBand[b] || 0;
+      var w = Math.round((n / maxBand) * 100);
+      return '<div class="bar-row">' +
+        '<div class="bar-top"><span>' + esc(BAND_FULL[b]) + '</span><span class="n">' + n + '권</span></div>' +
+        '<div class="bar"><i class="' + BAND_BAR[b] + '" style="width:' + (n ? Math.max(6, w) : 0) + '%"></i></div>' +
+      '</div>';
+    }).join('');
+
+    var readBooks = allBooks().filter(function (b) { return isRead(b.id); });
+    var readList = readBooks.length ? readBooks.map(function (b) {
+      var r = state.reading[b.id] || {};
+      var stars = '';
+      for (var k = 0; k < 5; k++) stars += (k < (r.rating || 0) ? '★' : '☆');
+      var nLog = logsFor(b.id).length;
+      return '<div class="libitem" style="display:flex;gap:10px;align-items:center">' +
+        '<div class="cover" style="width:42px;height:58px;font-size:19px;' + coverStyle(b) + '">' + (b.emoji || '📗') + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div class="log-title">' + esc(b.title) + '</div>' +
+          '<div class="lib-meta">' + (r.finishedAt ? fmtDate(r.finishedAt) + ' 완독' : '읽음') +
+            (nLog ? ' · 독후기록 ' + nLog + '건' : '') + '</div>' +
+          '<div style="color:#e8a33c;font-size:12px">' + stars + '</div>' +
+        '</div>' +
+        '<button class="btn btn-xs btn-ghost" data-act="openActivity" data-id="' + esc(b.id) + '">기록</button>' +
+      '</div>';
+    }).join('') : '<div class="empty" style="padding:22px 8px"><span class="em">🌱</span>아직 읽은 책이 없어요.<br>추천도서에서 첫 책을 골라 보세요.</div>';
+
+    var logs = (state.logs || []).slice().sort(function (a, b) { return (b.date || '').localeCompare(a.date || ''); });
+    var logList = logs.length ? logs.map(function (l) {
+      var stars = '';
+      for (var k = 0; k < 5; k++) stars += (k < (l.rating || 0) ? '★' : '☆');
+      return '<div class="logitem">' +
+        '<div class="log-top"><span class="log-title">' + esc(l.title || '') + '</span><span class="log-date">' + esc(fmtDate(l.date)) + '</span></div>' +
+        '<div class="log-type">' + esc((ACT_TYPES[l.type] ? ACT_TYPES[l.type].label : '활동')) + (l.rating ? ' · ' + stars : '') + '</div>' +
+        (l.memo ? '<div class="log-memo">' + esc(l.memo) + '</div>' : '') +
+        '<div style="text-align:right"><button class="log-del" data-act="delLog" data-id="' + esc(l.id) + '">삭제</button></div>' +
+      '</div>';
+    }).join('') : '<div class="empty" style="padding:22px 8px"><span class="em">✏️</span>독후기록이 아직 없어요.<br>추천도서에서 “독후활동”을 눌러 보세요.</div>';
+
+    var customList = (state.custom || []).length ? state.custom.map(function (b) {
+      return '<div class="libitem" style="display:flex;gap:10px;align-items:center">' +
+        '<div class="cover" style="width:40px;height:54px;font-size:18px;' + coverStyle(b) + '">' + (b.emoji || '📗') + '</div>' +
+        '<div style="flex:1;min-width:0"><div class="log-title">' + esc(b.title) + '</div>' +
+        '<div class="lib-meta">' + esc(b.author || '저자 미상') + ' · ' + esc(BAND_LABEL[b.band] || '기타') + (b.isbn ? ' · ' + esc(b.isbn) : '') + '</div></div>' +
+        '<button class="btn btn-xs btn-ghost" data-act="toggleRead" data-id="' + esc(b.id) + '">' + (isRead(b.id) ? '✓ 읽음' : '읽음') + '</button>' +
+        '<button class="btn btn-xs btn-danger" data-act="delCustom" data-id="' + esc(b.id) + '">삭제</button>' +
+      '</div>';
+    }).join('') : '<p class="hint">바코드 탭에서 직접 등록한 책이 여기에 모여요.</p>';
+
+    el.innerHTML =
+      '<div class="pad">' +
+        '<h1 class="h1">내 책장</h1>' +
+        '<p class="sub">읽은 책을 세고, 목표까지 얼마나 왔는지 확인해요.</p>' +
+        '<div class="stat-hero">' +
+          '<div class="ring-wrap">' +
+            '<svg class="ring" viewBox="0 0 120 120" aria-hidden="true">' +
+              '<circle class="ring-bg" cx="60" cy="60" r="52"></circle>' +
+              '<circle class="ring-fg" cx="60" cy="60" r="52" style="stroke-dasharray:' + ringLen + ';stroke-dashoffset:' + offset.toFixed(1) + '"></circle>' +
+            '</svg>' +
+            '<div class="ring-num">' + s.pct + '%<small>달성</small></div>' +
+          '</div>' +
+          '<div class="hero-text">' +
+            '<div class="big">' + ((state.profile.name || '').trim() ? esc(state.profile.name) + '의 책장' : '우리 아이 책장') + '</div>' +
+            '<div class="num">' + s.total + '<small>권 읽음</small></div>' +
+            '<div class="goal">목표 ' + (s.goal > 0 ? s.goal + '권 · ' + (s.remaining > 0 ? s.remaining + '권 남았어요' : '목표 달성!') : '목표를 정해 보세요') + '</div>' +
+            '<div class="quick-btns">' +
+              '<button class="btn btn-xs" data-act="openGoal">목표 수정</button>' +
+              '<button class="btn btn-xs" data-act="shareStats">내보내기</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="card">' +
+          '<h2 class="card-title">📊 이번 달 <span style="color:var(--brand)">' + s.thisMonth + '권</span> 읽었어요</h2>' +
+          bars +
+        '</div>' +
+        '<h2 class="section-title">읽은 책 <span class="aside">' + s.total + '권</span></h2>' +
+        readList +
+        '<h2 class="section-title">독후기록 모아보기 <span class="aside">' + logs.length + '건</span></h2>' +
+        logList +
+        '<h2 class="section-title">내가 등록한 책 <span class="aside">' + (state.custom || []).length + '권</span></h2>' +
+        customList +
+        '<div class="btns" style="margin-top:16px">' +
+          '<button class="btn btn-ghost btn-xs" data-act="openSettings">설정</button>' +
+          '<button class="btn btn-danger btn-xs" data-act="resetAll">기록 지우기</button>' +
+        '</div>' +
+        '<p class="note">기록은 이 브라우저(이 기기)에만 저장돼요. 다른 기기와 나누려면 “기록 내보내기”로 파일을 보관하세요.</p>' +
+      '</div>';
+  }
+
+  /* ============================================================
+     9. 시트(모달)
+     ============================================================ */
+
+  var sheetCtx = { type: '', bookId: '', rating: 0, actType: 'talk' };
+
+  function openSheet(html) {
+    var sheet = document.getElementById('sheet');
+    var back = document.getElementById('backdrop');
+    if (!sheet || !back) return;
+    sheet.innerHTML = html;
+    try { sheet.scrollTop = 0; } catch (e0) { /* 무시 */ }
+    sheet.hidden = false;
+    back.hidden = false;
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(function () {
+        sheet.classList.add('is-open');
+        back.classList.add('is-open');
+      });
+    } else {
+      sheet.classList.add('is-open');
+      back.classList.add('is-open');
+    }
+    document.body.classList.add('sheet-open');
+  }
+
+  function closeSheet() {
+    var sheet = document.getElementById('sheet');
+    var back = document.getElementById('backdrop');
+    if (!sheet || !back) return;
+    sheet.classList.remove('is-open');
+    back.classList.remove('is-open');
+    document.body.classList.remove('sheet-open');
+    var done = function () { if (!sheet.classList.contains('is-open')) { sheet.hidden = true; back.hidden = true; sheet.innerHTML = ''; } };
+    setTimeout(done, 260);
+  }
+
+  function openActivity(bookId) {
+    var b = getBook(bookId);
+    if (!b) return;
+    var r = state.reading[bookId] || {};
+    var myLogs = logsFor(bookId);
+    var lastLog = myLogs.length ? myLogs[myLogs.length - 1] : null;
+    sheetCtx = {
+      type: 'activity', bookId: bookId, rating: r.rating || 0,
+      actType: (lastLog && lastLog.type) || (b.activities[0] ? b.activities[0].t : 'talk')
+    };
+    var acts = (b.activities || []).map(function (a, i) {
+      var t = ACT_TYPES[a.t] || { label: '활동', icon: '📝' };
+      return '<div class="act">' +
+        '<div class="act-head"><span class="act-ico">' + t.icon + '</span><span class="act-type">' + esc(t.label) + '</span></div>' +
+        '<p class="act-title">' + (i + 1) + '. ' + esc(a.title) + '</p>' +
+        '<p class="act-prompt">' + esc(a.prompt) + '</p>' +
+      '</div>';
+    }).join('');
+
+    var typeChips = Object.keys(ACT_TYPES).map(function (k) {
+      var on = sheetCtx.actType === k;
+      return '<button class="chip' + (on ? ' is-on' : '') + '" data-act="pickType" data-type="' + k + '">' + ACT_TYPES[k].icon + ' ' + esc(ACT_TYPES[k].label) + '</button>';
+    }).join('');
+
+    var stars = '';
+    for (var i = 1; i <= 5; i++) {
+      stars += '<button class="star' + (i <= sheetCtx.rating ? ' is-on' : '') + '" data-act="rate" data-v="' + i + '" aria-label="별점 ' + i + '">★</button>';
+    }
+
+    openSheet(
+      '<div class="sheet-head">' +
+        '<div style="flex:1">' +
+          '<h2 id="sheetTitle">' + esc(b.title) + '</h2>' +
+          '<div class="sheet-sub">' + esc(BAND_FULL[b.band] || '기타') + ' · ' + esc(b.author) + ' · ' + esc(b.publisher) + '</div>' +
+        '</div>' +
+        '<button class="sheet-close" data-act="closeSheet" aria-label="닫기">✕</button>' +
+      '</div>' +
+      '<div class="sheet-body">' +
+        '<h3 class="section-title" style="margin-top:0">독후활동 <span class="aside">' + (b.activities || []).length + '가지</span></h3>' +
+        acts +
+        '<div class="divider"></div>' +
+        '<h3 class="section-title" style="margin-top:0">내 독후기록</h3>' +
+        '<div class="field">' +
+          '<span class="label">별점</span>' +
+          '<div class="stars" style="font-size:22px">' + stars + '</div>' +
+        '</div>' +
+        '<div class="field">' +
+          '<span class="label">활동 유형</span>' +
+          '<div class="type-chips">' + typeChips + '</div>' +
+        '</div>' +
+        '<div class="field">' +
+          '<label class="label" for="logMemo">소감 메모</label>' +
+          '<textarea class="input" id="logMemo" placeholder="아이와 나눈 이야기, 재미있었던 장면을 적어 두세요.">' + esc((lastLog && lastLog.memo) || '') + '</textarea>' +
+        '</div>' +
+        '<div class="btns">' +
+          '<button class="btn btn-primary" data-act="saveLog" data-id="' + esc(bookId) + '">기록 저장</button>' +
+          '<button class="btn ' + (isRead(bookId) ? 'btn-on' : 'btn-ghost') + '" data-act="toggleReadSheet" data-id="' + esc(bookId) + '">' + (isRead(bookId) ? '✓ 읽음' : '읽음 체크') + '</button>' +
+        '</div>' +
+        '<p class="hint">저장하면 읽은 책으로 세고, “내 책장 → 독후기록 모아보기”에 쌓여요.</p>' +
+      '</div>'
+    );
+  }
+
+  function openSettings() {
+    sheetCtx = { type: 'settings', bookId: '', rating: 0, actType: 'talk' };
+    openSheet(
+      '<div class="sheet-head">' +
+        '<div style="flex:1"><h2 id="sheetTitle">설정</h2><div class="sheet-sub">이 기기에만 저장돼요</div></div>' +
+        '<button class="sheet-close" data-act="closeSheet" aria-label="닫기">✕</button>' +
+      '</div>' +
+      '<div class="sheet-body">' +
+        '<div class="field"><label class="label" for="setName">아이 이름 (선택)</label>' +
+          '<input class="input" id="setName" value="' + esc(state.profile.name || '') + '" placeholder="예: 지우"></div>' +
+        '<div class="field"><label class="label" for="setGoal">목표 권수</label>' +
+          '<input class="input" id="setGoal" inputmode="numeric" value="' + esc(state.profile.goal || '') + '" placeholder="예: 40"></div>' +
+        '<div class="field"><label class="label" for="setKey">도서관 정보나루 인증키</label>' +
+          '<input class="input" id="setKey" autocomplete="off" spellcheck="false" value="' + esc(state.settings.apiKey || '') + '" placeholder="발급받은 인증키">' +
+          '<p class="hint">정보나루 마이페이지에서 인증키를 확인할 수 있어요. 인증키는 이 브라우저에만 저장되고 다른 곳으로 보내지 않아요(도서관 조회 요청에만 쓰여요).</p></div>' +
+        '<div class="field"><label class="label" for="setKakao">카카오 책 검색 REST 키 (선택)</label>' +
+          '<input class="input" id="setKakao" autocomplete="off" spellcheck="false" value="' + esc(state.settings.kakaoKey || '') + '" placeholder="바코드로 한글 책 찾을 때 사용">' +
+          '<p class="hint">developers.kakao.com에서 앱을 만들고 REST API 키를 받아 넣으면, 바코드 ISBN으로 한글 책 서지 정보를 더 잘 찾아요. 비워 두면 Google Books로 찾아요.</p></div>' +
+        '<div class="field"><label class="label" for="setRegion">기본 지역</label>' +
+          '<select class="select" id="setRegion">' + REGIONS.map(function (r) {
+            return '<option value="' + r.code + '"' + (state.settings.region === r.code ? ' selected' : '') + '>' + r.name + '</option>';
+          }).join('') + '</select></div>' +
+        '<div class="btns"><button class="btn btn-primary" data-act="saveSettings">저장</button></div>' +
+        '<div class="divider"></div>' +
+        '<div class="btns" style="flex-wrap:wrap">' +
+          '<button class="btn btn-ghost btn-xs" data-act="openNaruKey">인증키 신청·확인</button>' +
+          '<button class="btn btn-ghost btn-xs" data-act="exportData">기록 내보내기</button>' +
+          '<button class="btn btn-danger btn-xs" data-act="resetAll">기록 지우기</button>' +
+        '</div>' +
+        '<p class="note" style="margin-top:12px">추천도서 30권의 서지 정보는 교보문고 도서 정보를 기준으로 2026년 11월에 확인했어요. 앱은 이 파일 안에서만 동작하고 별도 서버로 기록을 보내지 않습니다.</p>' +
+      '</div>'
+    );
+  }
+
+  function openGoal() {
+    sheetCtx = { type: 'goal', bookId: '', rating: 0, actType: 'talk' };
+    openSheet(
+      '<div class="sheet-head"><div style="flex:1"><h2 id="sheetTitle">목표 권수</h2><div class="sheet-sub">올해 읽고 싶은 책 수</div></div>' +
+        '<button class="sheet-close" data-act="closeSheet" aria-label="닫기">✕</button></div>' +
+      '<div class="sheet-body">' +
+        '<div class="field"><label class="label" for="goalInput">목표</label>' +
+          '<input class="input" id="goalInput" inputmode="numeric" value="' + esc(state.profile.goal || '') + '" placeholder="예: 40"></div>' +
+        '<div class="btns"><button class="btn btn-primary" data-act="saveGoal">저장</button></div>' +
+        '<p class="hint">아이 나이에 맞춰 한 달 3~5권이면 충분해요. 40권이면 1년 동안 주 1권 정도예요.</p>' +
+      '</div>'
+    );
+  }
+
+  /* ============================================================
+     10. 동작
+     ============================================================ */
+
+  function setTab(tab) {
+    state.ui.tab = tab;
+    saveState();
+    var toastEl = document.getElementById('toast');
+    if (toastEl) toastEl.classList.remove('is-on');
+    var tabs = ['books', 'library', 'scan', 'shelf'];
+    tabs.forEach(function (t) {
+      var sec = document.getElementById('tab-' + t);
+      if (sec) sec.hidden = (t !== tab);
+    });
+    var btns = $$('.tab-btn');
+    btns.forEach(function (b) {
+      var on = b.getAttribute('data-tab') === tab;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    if (tab === 'books') renderBooksShell();
+    else if (tab === 'library') renderLibrary();
+    else if (tab === 'scan') renderScan();
+    else if (tab === 'shelf') renderShelf();
+    var main = document.getElementById('main');
+    if (main && typeof main.scrollTo === 'function') main.scrollTo(0, 0);
+    if (typeof window.scrollTo === 'function') window.scrollTo(0, 0);
+  }
+
+  function setBand(band) {
+    state.ui.band = band;
+    saveState();
+    renderBandChips();
+    updateBooksList();
+  }
+
+  function setQuery(q) {
+    state.ui.q = q;
+    saveState();
+    updateBooksList();
+  }
+
+  function toggleRead(id, opts) {
+    var b = getBook(id);
+    if (!b) return;
+    var cur = state.reading[id] || {};
+    if (cur.done) {
+      cur.done = false;
+      delete cur.finishedAt;
+    } else {
+      cur.done = true;
+      cur.finishedAt = todayISO();
+    }
+    state.reading[id] = cur;
+    saveState();
+    var label = cur.done ? '읽은 책으로 표시했어요' : '읽음 표시를 풀었어요';
+    if (!opts || !opts.silent) toast(label);
+    refreshCurrentTab();
+  }
+
+  function saveLog(bookId, payload) {
+    var b = getBook(bookId);
+    if (!b) return;
+    var date = todayISO();
+    var memo = (payload.memo || '').trim();
+    var type = payload.type || 'talk';
+    var rating = payload.rating || 0;
+    var existing = null;
+    for (var i = 0; i < state.logs.length; i++) {
+      var l = state.logs[i];
+      if (l.bookId === bookId && l.date === date) existing = l;
+    }
+    var log;
+    if (existing) {
+      existing.type = type;
+      existing.rating = rating;
+      existing.memo = memo;
+      log = existing;
+    } else {
+      log = {
+        id: uid('log'), bookId: bookId, title: b.title,
+        type: type, rating: rating, memo: memo, date: date
+      };
+      state.logs.push(log);
+    }
+    var r = state.reading[bookId] || {};
+    if (rating) r.rating = rating;
+    if (!r.done) { r.done = true; r.finishedAt = date; }
+    state.reading[bookId] = r;
+    saveState();
+    return log;
+  }
+
+  function addCustom(book) {
+    var t = (book.title || '').trim();
+    if (!t) return null;
+    var item = {
+      id: uid('c'),
+      title: t,
+      author: (book.author || '').trim() || '저자 미상',
+      publisher: (book.publisher || '').trim() || '출판사 미상',
+      year: book.year || '',
+      isbn: book.isbn || '',
+      band: book.band || 'etc',
+      emoji: '📗',
+      tags: [],
+      why: '직접 등록한 책',
+      activities: [
+        { t: 'talk', title: '재미있었던 장면', prompt: '가장 재미있었던 장면과 그 이유를 이야기해 보세요.' },
+        { t: 'write', title: '한 줄 감상', prompt: '이 책을 한 문장으로 소개해 보세요.' }
+      ]
+    };
+    state.custom.push(item);
+    saveState();
+    return item;
+  }
+
+  function refreshCurrentTab() {
+    var tab = state.ui.tab || 'books';
+    if (tab === 'books') { updateBooksList(); renderBandChips(); }
+    else if (tab === 'library') renderLibrary();
+    else if (tab === 'scan') { /* 스캔 화면은 상태 유지 */ }
+    else if (tab === 'shelf') renderShelf();
+    updateBrandSub();
+  }
+
+  /* --- 도서관 조회 --- */
+
+  function setHoldingBusy(on) {
+    holdingView.loading = on;
+    renderHoldingResultFromState();
+  }
+
+  function lookupLibListUrl() {
+    return 'https://data4library.kr/api/libSrch?authKey=' + encodeURIComponent((state.settings.apiKey || '').trim()) +
+      '&region=' + encodeURIComponent(state.settings.region || '21') +
+      (state.settings.dtlRegion ? '&dtl_region=' + encodeURIComponent(state.settings.dtlRegion) : '') +
+      '&pageNo=1&pageSize=50&format=json';
+  }
+
+  async function listLibraries() {
+    var key = (state.settings.apiKey || '').trim();
+    if (!key) { toast('설정에서 정보나루 인증키를 넣으면 지역 도서관 목록을 볼 수 있어요'); return; }
+    holdingView = { mode: 'libs', bookId: '', rows: [], error: '', loading: true, sub: '' };
+    renderHoldingResultFromState();
+    try {
+      var res = await fetch(lookupLibListUrl(), { cache: 'no-store' });
+      var json = await res.json();
+      var err = apiErrMessage(json);
+      if (err) throw new Error(err);
+      var libs = parseLibsByBook(json);
+      holdingView.loading = false;
+      holdingView.rows = libs.map(function (l) { return { lib: l, checked: false, hasBook: false, loanAvailable: false, calls: [] }; });
+      holdingView.sub = regionName(state.settings.region) + (state.settings.dtlRegion ? ' ' + state.settings.dtlRegion : '') + ' · ' + libs.length + '곳 (운영시간·휴관일 안내)';
+      renderHoldingResultFromState();
+    } catch (e) {
+      holdingView.mode = 'live';
+      holdingView.loading = false;
+      holdingView.error = (e && e.message ? e.message : '네트워크 오류');
+      renderHoldingResultFromState();
+    }
+  }
+
+  function showDemo() {
+    var book = currentLibBook();
+    if (!book) return;
+    holdingView = { mode: 'demo', bookId: book.id, rows: demoScreen(book), error: '', loading: false, sub: '부산 북구 공공도서관 7곳 예시 · 실제 대출 현황 아님' };
+    renderHoldingResultFromState();
+  }
+
+  function apiErrMessage(json) {
+    var r = json && json.response;
+    if (r && r.errCode) {
+      if (r.errCode === 'authErr') return '인증키가 맞지 않아요. 설정에서 정보나루 인증키를 다시 확인해 주세요.';
+      return (r.error || '도서관 정보나루가 요청을 거절했어요') + ' (' + r.errCode + ')';
+    }
+    if (json && json.error) return String(json.error);
+    return '';
+  }
+
+  async function lookupHolding() {
+    var book = currentLibBook();
+    if (!book) { toast('책을 먼저 골라 주세요'); return; }
+    var key = (state.settings.apiKey || '').trim();
+    if (!key) { showDemo(); toast('인증키가 없어 예시 화면을 보여드려요'); return; }
+    holdingView = { mode: 'live', bookId: book.id, rows: [], error: '', loading: true, sub: '' };
+    renderHoldingResultFromState();
+    try {
+      var res = await fetch(lookupUrl(book.isbn), { cache: 'no-store' });
+      var json = await res.json();
+      var err = apiErrMessage(json);
+      if (err) { throw new Error(err); }
+      var libs = parseLibsByBook(json);
+      var rows = libs.slice(0, 30).map(function (l) { return { lib: l, checked: false, hasBook: false, loanAvailable: false, calls: [] }; });
+      holdingView.rows = rows;
+      holdingView.loading = false;
+      holdingView.sub = regionName(state.settings.region) + (state.settings.dtlRegion ? ' ' + state.settings.dtlRegion : '') + ' 지역 · ' + libs.length + '곳';
+      renderHoldingResultFromState();
+
+      // 상위 6곳의 대출 가능 여부를 차례로 확인
+      var limit = Math.min(6, rows.length);
+      for (var i = 0; i < limit; i++) {
+        try {
+          var r2 = await fetch(existUrl(rows[i].lib.code, book.isbn), { cache: 'no-store' });
+          var j2 = await r2.json();
+          var info = parseBookExist(j2);
+          if (info) {
+            rows[i].checked = true;
+            rows[i].hasBook = info.hasBook;
+            rows[i].loanAvailable = info.loanAvailable;
+            rows[i].calls = info.callNumbers;
+            renderHoldingResultFromState();
+          }
+        } catch (e2) { /* 한 곳 실패는 넘어감 */ }
+      }
+    } catch (e) {
+      holdingView.loading = false;
+      holdingView.mode = 'live';
+      holdingView.error = (e && e.message ? e.message : '네트워크 오류') + ' 정보나루에서 직접 검색해 보세요.';
+      renderHoldingResultFromState();
+    }
+  }
+
+  /* --- ISBN 서지 조회 --- */
+
+  async function lookupIsbn(rawIsbn) {
+    var isbn = digitsOnly(rawIsbn);
+    scanView.isbn = isbn;
+    scanView.found = null;
+    scanView.error = '';
+    if (!isbn) { scanView.error = 'ISBN을 입력해 주세요.'; renderScan(); return null; }
+    if (isbn.length === 10) {
+      // ISBN-10 → 13 변환
+      var body = '978' + isbn.slice(0, 9);
+      var sum = 0;
+      for (var i = 0; i < 12; i++) sum += parseInt(body.charAt(i), 10) * (i % 2 === 0 ? 1 : 3);
+      isbn = body + String((10 - (sum % 10)) % 10);
+      scanView.isbn = isbn;
+    }
+    if (!isValidISBN13(isbn)) { scanView.error = 'ISBN-13 체크 숫자가 맞지 않아요. 바코드를 다시 확인해 주세요.'; renderScan(); return null; }
+    scanView.busy = true; renderScan();
+
+    var found = null;
+
+    // 0) 카카오 책 검색 (키가 있을 때, 한국 도서 커버리지가 좋음)
+    var kk = (state.settings.kakaoKey || '').trim();
+    if (kk) {
+      try {
+        var kr = await fetch('https://dapi.kakao.com/v3/search/book?target=isbn&query=' + isbn, {
+          cache: 'no-store', headers: { Authorization: 'KakaoAK ' + kk }
+        });
+        if (kr.ok) {
+          var kj = await kr.json();
+          found = parseKakao(kj);
+          if (found && !found.isbn) found.isbn = isbn;
+        }
+      } catch (e0) { /* 다음 경로 */ }
+    }
+
+    // 1) Google Books
+    if (!found) {
+      try {
+        var g = await fetch('https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn + '&country=KR', { cache: 'no-store' });
+        if (g.ok) {
+          var gj = await g.json();
+          found = parseGoogleBooks(gj);
+          if (found) found.isbn = isbn;
+        }
+      } catch (e) { /* 다음 경로 */ }
+    }
+
+    // 2) 도서관 정보나루 도서 상세 (키가 있을 때만)
+    if (!found && (state.settings.apiKey || '').trim()) {
+      try {
+        var n = await fetch('https://data4library.kr/api/srchDtlList?authKey=' + encodeURIComponent(state.settings.apiKey.trim()) +
+          '&isbn13=' + isbn + '&format=json', { cache: 'no-store' });
+        var nj = await n.json();
+        var objs = collectObjects(nj, [], 0);
+        for (var k = 0; k < objs.length; k++) {
+          if (objs[k].bookname) {
+            found = {
+              title: String(objs[k].bookname),
+              author: String(objs[k].authors || ''),
+              publisher: String(objs[k].publisher || ''),
+              year: String(objs[k].publication_year || ''),
+              isbn: isbn,
+              source: '도서관 정보나루'
+            };
+            break;
+          }
+        }
+      } catch (e2) { /* 다음 경로 */ }
+    }
+
+    // 3) Open Library
+    if (!found) {
+      try {
+        var o = await fetch('https://openlibrary.org/isbn/' + isbn + '.json', { cache: 'no-store' });
+        if (o.ok) {
+          var oj = await o.json();
+          found = parseOpenLibrary(oj);
+          if (found) found.isbn = isbn;
+        }
+      } catch (e3) { /* 실패 */ }
+    }
+
+    scanView.busy = false;
+    if (found) {
+      found.band = guessBand(found.title);
+      scanView.found = found;
+      scanView.error = '';
+    } else {
+      scanView.error = 'ISBN ' + isbn + ' 의 서지 정보를 찾지 못했어요.';
+    }
+    renderScan();
+    return found;
+  }
+
+  function guessBand() { return 'etc'; }
+
+  function addFoundBook() {
+    var f = scanView.found;
+    if (!f) return null;
+    var bandEl = document.getElementById('foundBand');
+    var band = bandEl ? bandEl.value : 'etc';
+    var item = addCustom({ title: f.title, author: f.author, publisher: f.publisher, year: f.year, isbn: f.isbn, band: band });
+    if (item) {
+      toast('내 책장에 담았어요');
+      scanView.found = null;
+      renderScan();
+    }
+    return item;
+  }
+
+  /* --- 내보내기 / 초기화 --- */
+
+  function exportData() {
+    try {
+      var data = JSON.stringify(state, null, 2);
+      var blob = new Blob([data], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = '책자람-독서기록-' + todayISO() + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+      toast('기록 파일을 내려받았어요');
+    } catch (e) {
+      toast('이 브라우저에서는 내보내기를 지원하지 않아요');
+    }
+    return JSON.stringify(state);
+  }
+
+  function resetAll() {
+    var ok = true;
+    if (typeof window.confirm === 'function') ok = window.confirm('읽은 책, 독후기록, 등록한 책을 모두 지울까요? 되돌릴 수 없어요.');
+    if (!ok) return false;
+    state = freshState();
+    try { window.localStorage.removeItem(STORE_KEY); } catch (e) { /* 무시 */ }
+    saveState();
+    closeSheet();
+    setTab('shelf');
+    toast('기록을 지웠어요');
+    return true;
+  }
+
+  /* --- 외부 링크 --- */
+
+  function openNewWindow(url) {
+    if (typeof window.open === 'function') {
+      var w = window.open(url, '_blank', 'noopener');
+      if (w) return;
+    }
+    toast('팝업이 막혔어요. 브라우저 설정을 확인해 주세요');
+  }
+
+  function naruUrl() {
+    var b = currentLibBook() || scanView.found;
+    var q = b ? (b.title || b.isbn || '') : '';
+    return 'https://www.data4library.kr/srch?srchText=' + encodeURIComponent(q);
+  }
+
+  function copyTitle() {
+    var b = currentLibBook();
+    var text = b ? b.title : '';
+    if (!text) { toast('책을 먼저 골라 주세요'); return; }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text);
+        toast('책 제목을 복사했어요');
+        return;
+      }
+    } catch (e) { /* fallback */ }
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      toast('책 제목을 복사했어요');
+    } catch (e2) {
+      toast('복사하지 못했어요: ' + text);
+    }
+  }
+
+  /* --- 바코드 스캔 --- */
+
+  async function startScan() {
+    if (!window.Html5Qrcode) {
+      scanView.status = 'error';
+      scanView.message = '스캔 라이브러리를 불러오지 못했어요(인터넷 연결 확인). 아래 ISBN 직접 입력을 이용해 주세요.';
+      updateScanChrome();
+      return;
+    }
+    try {
+      if (!scanner) {
+        scanner = new window.Html5Qrcode('reader', {
+          formatsToSupport: window.Html5QrcodeSupportedFormats
+            ? [window.Html5QrcodeSupportedFormats.EAN_13, window.Html5QrcodeSupportedFormats.EAN_8]
+            : undefined,
+          verbose: false
+        });
+      }
+      var reader = document.getElementById('reader');
+      if (reader) reader.hidden = false;
+      var mock = document.getElementById('scanMock');
+      if (mock) mock.hidden = true;
+      await scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 260, height: 140 } },
+        function (decodedText) { onScanSuccess(decodedText); },
+        function () { /* 프레임마다 나는 오류는 무시 */ }
+      );
+      scanView.status = 'on';
+      scanView.message = '';
+    } catch (e) {
+      scanView.status = 'error';
+      scanView.message = '카메라 권한이 없거나 지원되지 않아요. https 주소로 열었는지 확인하고, 안 되면 ISBN을 직접 입력해 주세요.';
+    }
+    updateScanChrome();
+  }
+
+  // 스캔 중에는 화면을 다시 그리면 카메라 화면이 사라지므로 상태 줄만 바꿈
+  function updateScanChrome() {
+    var st = document.getElementById('scanStatus');
+    if (st) st.innerHTML = scanStatusHtml();
+    var reader = document.getElementById('reader');
+    if (reader) reader.hidden = !(scanView.status === 'on');
+    var mock = document.getElementById('scanMock');
+    if (mock) mock.hidden = (scanView.status === 'on');
+  }
+
+  async function stopScan() {
+    try {
+      if (scanner) { await scanner.stop(); await scanner.clear(); }
+    } catch (e) { /* 무시 */ }
+    scanView.status = 'idle';
+    renderScan();
+  }
+
+  async function onScanSuccess(text) {
+    var code = digitsOnly(text);
+    if (!isBookBarcode(code)) {
+      toast('책 바코드(978/979로 시작하는 13자리)가 아니에요');
+      return;
+    }
+    await stopScan();
+    toast('바코드를 읽었어요: ' + code);
+    lookupIsbn(code);
+  }
+
+  /* ============================================================
+     11. 이벤트
+     ============================================================ */
+
+  function onDocumentClick(ev) {
+    var t = ev.target;
+    if (!t || !t.closest) return;
+    var el = t.closest('[data-act]');
+    if (!el) {
+      if (t.id === 'backdrop') closeSheet();
+      return;
+    }
+    var act = el.getAttribute('data-act');
+    var id = el.getAttribute('data-id');
+
+    if (act === 'setBand') setBand(el.getAttribute('data-band'));
+    else if (act === 'toggleWhy') {
+      expandedWhy[id] = !expandedWhy[id];
+      updateBooksList();
+    }
+    else if (act === 'toggleRead') toggleRead(id);
+    else if (act === 'gotoLibrary') {
+      state.ui.libBookId = id;
+      saveState();
+      holdingView = { mode: '', bookId: '', rows: [], error: '', loading: false, sub: '' };
+      setTab('library');
+    }
+    else if (act === 'openActivity') openActivity(id);
+    else if (act === 'closeSheet') closeSheet();
+    else if (act === 'openSettings') openSettings();
+    else if (act === 'openGoal') openGoal();
+    else if (act === 'saveGoal') {
+      var g = parseInt((document.getElementById('goalInput') || {}).value, 10);
+      if (isNaN(g) || g < 0) { toast('숫자로 입력해 주세요'); return; }
+      state.profile.goal = g;
+      saveState();
+      closeSheet();
+      refreshCurrentTab();
+      toast('목표를 ' + g + '권으로 저장했어요');
+    }
+    else if (act === 'saveSettings') {
+      var nm = (document.getElementById('setName') || {}).value || '';
+      var gl = parseInt((document.getElementById('setGoal') || {}).value, 10);
+      var ky = (document.getElementById('setKey') || {}).value || '';
+      var kk2 = (document.getElementById('setKakao') || {}).value || '';
+      var rg = (document.getElementById('setRegion') || {}).value || '21';
+      state.profile.name = nm.trim();
+      if (!isNaN(gl) && gl >= 0) state.profile.goal = gl;
+      state.settings.apiKey = ky.trim();
+      state.settings.kakaoKey = kk2.trim();
+      state.settings.region = rg;
+      saveState();
+      closeSheet();
+      refreshCurrentTab();
+      toast('설정을 저장했어요');
+    }
+    else if (act === 'rate') {
+      sheetCtx.rating = parseInt(el.getAttribute('data-v'), 10) || 0;
+      var stars = $$('.sheet .star');
+      stars.forEach(function (s2) {
+        var v = parseInt(s2.getAttribute('data-v'), 10);
+        s2.classList.toggle('is-on', v <= sheetCtx.rating);
+      });
+    }
+    else if (act === 'pickType') {
+      sheetCtx.actType = el.getAttribute('data-type') || 'talk';
+      var chips = $$('.sheet [data-act="pickType"]');
+      chips.forEach(function (c) { c.classList.toggle('is-on', c.getAttribute('data-type') === sheetCtx.actType); });
+    }
+    else if (act === 'saveLog') {
+      var memoEl = document.getElementById('logMemo');
+      var memo = memoEl ? memoEl.value : '';
+      saveLog(id, { type: sheetCtx.actType, rating: sheetCtx.rating, memo: memo });
+      closeSheet();
+      refreshCurrentTab();
+      toast('독후기록을 저장했어요');
+    }
+    else if (act === 'toggleReadSheet') {
+      toggleRead(id);
+      var btn = el;
+      btn.textContent = isRead(id) ? '✓ 읽음' : '읽음 체크';
+      btn.className = 'btn ' + (isRead(id) ? 'btn-on' : 'btn-ghost');
+    }
+    else if (act === 'delLog') {
+      state.logs = (state.logs || []).filter(function (l) { return l.id !== id; });
+      saveState();
+      renderShelf();
+      toast('기록을 지웠어요');
+    }
+    else if (act === 'delCustom') {
+      if (typeof window.confirm === 'function' && !window.confirm('이 책을 책장에서 지울까요?')) return;
+      state.custom = (state.custom || []).filter(function (b) { return b.id !== id; });
+      delete state.reading[id];
+      saveState();
+      renderShelf();
+      toast('책장에서 지웠어요');
+    }
+    else if (act === 'lookupHolding') lookupHolding();
+    else if (act === 'listLibraries') listLibraries();
+    else if (act === 'demoHolding') showDemo();
+    else if (act === 'openNaru') openNewWindow(naruUrl());
+    else if (act === 'openBusan') openNewWindow('https://library.busan.go.kr/portal/intro/search/indexForAllDetail.do?menu_idx=12');
+    else if (act === 'openNaruKey') openNewWindow('https://www.data4library.kr/myPage');
+    else if (act === 'copyTitle') copyTitle();
+    else if (act === 'startScan') startScan();
+    else if (act === 'stopScan') stopScan();
+    else if (act === 'lookupIsbn') {
+      var mi = document.getElementById('manualIsbn');
+      lookupIsbn(mi ? mi.value : '');
+    }
+    else if (act === 'addFound') addFoundBook();
+    else if (act === 'checkFound') {
+      var f = scanView.found;
+      if (!f) return;
+      transientBook = {
+        id: 'scan_' + f.isbn, title: f.title, author: f.author || '저자 미상',
+        publisher: f.publisher || '출판사 미상', year: f.year || '', isbn: f.isbn,
+        band: 'etc', emoji: '📗', tags: [], why: '바코드로 찾은 책', activities: []
+      };
+      state.ui.libBookId = transientBook.id;
+      saveState();
+      holdingView = { mode: '', bookId: '', rows: [], error: '', loading: false, sub: '' };
+      setTab('library');
+    }
+    else if (act === 'addCustom') {
+      var title = (document.getElementById('cTitle') || {}).value || '';
+      var author = (document.getElementById('cAuthor') || {}).value || '';
+      var pub = (document.getElementById('cPublisher') || {}).value || '';
+      var band = (document.getElementById('cBand') || {}).value || 'etc';
+      var isbnRaw = (document.getElementById('cIsbn') || {}).value || '';
+      var isbn = digitsOnly(isbnRaw);
+      if (!title.trim()) { toast('제목을 입력해 주세요'); return; }
+      if (isbn && !isValidISBN13(isbn)) { toast('ISBN 13자리를 확인해 주세요'); return; }
+      addCustom({ title: title, author: author, publisher: pub, band: band, isbn: isbn });
+      toast('내 책장에 등록했어요');
+      renderScan();
+    }
+    else if (act === 'exportData' || act === 'shareStats') exportData();
+    else if (act === 'resetAll') resetAll();
+  }
+
+  function onDocumentInput(ev) {
+    var t = ev.target;
+    if (!t || !t.id) return;
+    if (t.id === 'q') setQuery(t.value);
+    else if (t.id === 'libBook') { state.ui.libBookId = t.value; saveState(); holdingView = { mode: '', bookId: '', rows: [], error: '', loading: false, sub: '' }; renderLibrary(); }
+    else if (t.id === 'regionSel') { state.settings.region = t.value; saveState(); }
+    else if (t.id === 'dtlRegion') { state.settings.dtlRegion = t.value.replace(/[^0-9]/g, ''); saveState(); }
+  }
+
+  function onDocumentChange(ev) {
+    var t = ev.target;
+    if (!t || !t.id) return;
+    if (t.id === 'libBook') { state.ui.libBookId = t.value; saveState(); renderLibrary(); }
+    else if (t.id === 'regionSel') { state.settings.region = t.value; saveState(); }
+  }
+
+  function onKeydown(ev) {
+    if (ev.key === 'Escape') { closeSheet(); return; }
+    var t = ev.target;
+    if (ev.key === 'Enter' && t && t.id === 'manualIsbn') {
+      ev.preventDefault();
+      lookupIsbn(t.value);
+    }
+  }
+
+  function init() {
+    document.addEventListener('click', onDocumentClick);
+    document.addEventListener('input', onDocumentInput);
+    document.addEventListener('change', onDocumentChange);
+    document.addEventListener('keydown', onKeydown);
+    $$('.tab-btn').forEach(function (b) {
+      b.addEventListener('click', function () { setTab(b.getAttribute('data-tab')); });
+    });
+    var back = document.getElementById('backdrop');
+    if (back) back.addEventListener('click', closeSheet);
+    setTab(state.ui.tab || 'books');
+    updateBrandSub();
+  }
+
+  /* ============================================================
+     12. 테스트 훅 & 시작
+     ============================================================ */
+
+  window.__app = {
+    state: function () { return state; },
+    BOOKS: BOOKS,
+    DEMO_LIBS: DEMO_LIBS,
+    api: {
+      allBooks: allBooks,
+      getBook: getBook,
+      filterBooks: filterBooks,
+      computeStats: computeStats,
+      isRead: isRead,
+      isValidISBN13: isValidISBN13,
+      isBookBarcode: isBookBarcode,
+      parseLibsByBook: parseLibsByBook,
+      parseKakao: parseKakao,
+      parseBookExist: parseBookExist,
+      parseGoogleBooks: parseGoogleBooks,
+      parseOpenLibrary: parseOpenLibrary,
+      demoScreen: demoScreen,
+      setTab: setTab,
+      setBand: setBand,
+      setQuery: setQuery,
+      toggleRead: toggleRead,
+      saveLog: saveLog,
+      addCustom: addCustom,
+      lookupIsbn: lookupIsbn,
+      lookupHolding: lookupHolding,
+      listLibraries: listLibraries,
+      showDemo: showDemo,
+      resetAll: resetAll,
+      exportData: exportData,
+      render: function (tab) { setTab(tab); },
+      addFoundBook: addFoundBook,
+      guessBand: guessBand,
+      holdingView: function () { return holdingView; },
+      scanView: function () { return scanView; }
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
