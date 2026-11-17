@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f3ea">
+<meta name="color-scheme" content="light">
+<meta name="description" content="AR 지수·렉사일 지수 순서로 영어원서를 고르고, 바코드로 등록해 북트리에 쌓고, 잠수네식 독후활동까지 한 화면에서.">
+<title>책자람 English — 영어원서 독서 기록</title>
+<style>
+  :root{
+    --paper:#f6f3ea; --card:#fffdf9; --ink:#26241e; --muted:#7b7768; --line:#e6e0d2;
+    --brand:#2f5c8a; --brand-2:#3d76ad; --brand-soft:#e7eff7; --brand-ink:#1e3f61;
+    --accent:#e0913d; --accent-soft:#fdf1e0; --danger:#bf5741; --danger-soft:#fbeae6;
+    --green:#3f7f4f; --green-soft:#e8f3e6;
+    --a1:#4f86b8; --a1s:#e6f0f8;
+    --a2:#4f8a5f; --a2s:#e7f2e6;
+    --a3:#b98a1f; --a3s:#fbf1db;
+    --a4:#a85f36; --a4s:#fbeade;
+    --a5:#8a5b9e; --a5s:#f2eaf7;
+    --r-lg:20px; --r-md:14px; --r-sm:10px;
+    --shadow:0 10px 26px rgba(38,36,30,.07);
+    --shadow-sm:0 3px 10px rgba(38,36,30,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%, #efe9d9 0%, #e9e3d4 55%, #e4ddcc 100%);
+    color:var(--ink); font-size:16px; line-height:1.5; -webkit-text-size-adjust:100%;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:440px; margin:0 auto; min-height:100dvh; background:var(--paper); position:relative;
+    display:flex; flex-direction:column; box-shadow:0 0 0 1px rgba(38,36,30,.05), 0 24px 60px rgba(38,36,30,.10);}
+  .appbar{position:sticky; top:0; z-index:30; background:rgba(246,243,234,.93); backdrop-filter:saturate(1.3) blur(10px);
+    border-bottom:1px solid var(--line); padding-top:env(safe-area-inset-top);}
+  .appbar-in{display:flex; align-items:center; gap:10px; padding:12px 16px}
+  .brand{display:flex; align-items:center; gap:10px; min-width:0; flex:1}
+  .brand-mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:19px;
+    background:linear-gradient(145deg,#e8f1fb,#d3e5f7); border:1px solid #cfe0f2; flex:none}
+  .brand-name{font-size:17px; font-weight:800; letter-spacing:-.02em; line-height:1.2}
+  .brand-sub{font-size:11.5px; color:var(--muted); letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .icon-btn{width:42px;height:42px;border-radius:13px;border:1px solid var(--line); background:#fffdf9;
+    display:grid;place-items:center; color:var(--ink); cursor:pointer; flex:none}
+  .icon-btn:active{transform:scale(.96)}
+  .main{flex:1 0 auto; padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+  .pad{padding:16px 16px 8px}
+  .h1{font-size:21px; font-weight:800; letter-spacing:-.03em; margin:2px 0 4px}
+  .sub{font-size:13px; color:var(--muted); margin:0 0 12px; letter-spacing:-.01em}
+  .section-title{font-size:14px; font-weight:700; letter-spacing:-.02em; margin:22px 0 10px;
+    display:flex; align-items:center; justify-content:space-between; gap:8px}
+  .section-title .aside{font-size:12px; font-weight:500; color:var(--muted)}
+
+  /* segmented */
+  .seg{display:flex; gap:4px; background:#ece7da; border-radius:12px; padding:4px; margin-bottom:10px}
+  .seg button{flex:1; border:0; background:transparent; font-family:inherit; font-size:13px; font-weight:700;
+    color:var(--muted); border-radius:9px; padding:9px 6px; cursor:pointer; letter-spacing:-.02em}
+  .seg button.on{background:#fffdf9; color:var(--brand-ink); box-shadow:var(--shadow-sm)}
+
+  .searchbox{position:relative; margin-bottom:10px}
+  .searchbox input{width:100%; height:46px; border-radius:14px; border:1px solid var(--line); background:#fffdf9;
+    padding:0 14px 0 40px; font-size:15px; color:var(--ink); outline:none; font-family:inherit}
+  .searchbox input:focus{border-color:var(--brand-2); box-shadow:0 0 0 3px rgba(61,118,173,.14)}
+  .searchbox .ico{position:absolute; left:13px; top:13px; font-size:16px; opacity:.5}
+  .chips{display:flex; gap:7px; overflow-x:auto; padding:2px 0 8px; scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none; border:1px solid var(--line); background:#fffdf9; color:var(--muted);
+    border-radius:999px; padding:8px 13px; font-size:13px; font-weight:600; cursor:pointer;
+    letter-spacing:-.01em; font-family:inherit}
+  .chip.is-on{background:var(--ink); border-color:var(--ink); color:#fff}
+  .list-head{display:flex; align-items:baseline; justify-content:space-between; margin:6px 2px 10px; font-size:12.5px; color:var(--muted)}
+  .list-head b{color:var(--brand); font-weight:800}
+
+  /* book card */
+  .book{display:flex; gap:12px; padding:13px; background:var(--card); border:1px solid var(--line);
+    border-radius:18px; margin-bottom:10px; box-shadow:var(--shadow-sm)}
+  .cover{width:62px; height:86px; border-radius:9px; flex:none; overflow:hidden; position:relative;
+    background:linear-gradient(150deg,var(--cs1,#fde8c8),var(--cs2,#f7c78b));
+    display:grid; place-items:center; font-size:26px;
+    box-shadow:inset -6px 0 0 rgba(0,0,0,.05), 0 4px 10px rgba(38,36,30,.10)}
+  .cover img{width:100%; height:100%; object-fit:cover; display:block}
+  .book-main{min-width:0; flex:1}
+  .book-title{font-size:15px; font-weight:800; letter-spacing:-.02em; margin:0 0 2px; line-height:1.3}
+  .book-meta{font-size:12px; color:var(--muted); margin:0 0 6px; letter-spacing:-.01em}
+  .badges{display:flex; gap:5px; flex-wrap:wrap; margin:0 0 7px}
+  .bd{font-size:10.5px; font-weight:800; padding:3px 7px; border-radius:7px; letter-spacing:-.01em}
+  .bd-ar{background:var(--brand-soft); color:var(--brand-ink)}
+  .bd-lex{background:var(--accent-soft); color:#96571c}
+  .bd-j{background:#eae7dd; color:#5f5a4c}
+  .bd-on{background:var(--green-soft); color:var(--green)}
+  .book-why{font-size:12.6px; color:#4c483e; margin:0 0 8px; line-height:1.55; letter-spacing:-.01em}
+  .book-actions{display:flex; gap:6px; flex-wrap:wrap}
+  .isbn{font-size:11px; color:#a09a8b; margin:8px 0 0; letter-spacing:.02em}
+
+  .btn{border:1px solid var(--line); background:#fff; color:var(--ink); font-family:inherit;
+    font-size:13.5px; font-weight:700; letter-spacing:-.02em; border-radius:11px; padding:10px 12px;
+    cursor:pointer; display:inline-flex; align-items:center; gap:5px; justify-content:center;
+    text-decoration:none; line-height:1.25}
+  .btn:active{transform:scale(.985)}
+  .btn.sm{font-size:12.5px; padding:8px 10px; border-radius:10px}
+  .btn.primary{background:var(--brand); border-color:var(--brand); color:#fff}
+  .btn.ghost{background:transparent}
+  .btn.wide{width:100%; padding:14px}
+  .btn:disabled{opacity:.5}
+  .tag{font-size:11.5px; color:var(--brand-2); font-weight:700; letter-spacing:-.01em}
+
+  /* library */
+  .lib-card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:15px;
+    margin-bottom:11px; box-shadow:var(--shadow-sm)}
+  .lib-card.main{border-color:#cfdff0; background:linear-gradient(180deg,#f5faff,#fffdf9)}
+  .lib-name{font-size:15.5px; font-weight:800; margin:0 0 3px; letter-spacing:-.02em}
+  .lib-note{font-size:12.5px; color:var(--muted); margin:0 0 6px}
+  .lib-row{font-size:13px; color:#43403a; margin:3px 0; display:flex; gap:7px; align-items:flex-start}
+  .lib-row .k{color:var(--muted); flex:none; width:52px; font-size:12px; padding-top:1px}
+  .kv{font-size:12.5px; color:#5c584d}
+
+  /* shelf */
+  .stat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:4px 0 12px}
+  .stat{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:11px 10px; text-align:center}
+  .stat b{display:block; font-size:19px; font-weight:800; letter-spacing:-.03em; color:var(--brand-ink)}
+  .stat span{font-size:11px; color:var(--muted); letter-spacing:-.01em}
+  .rec{display:flex; gap:11px; padding:12px; background:var(--card); border:1px solid var(--line);
+    border-radius:16px; margin-bottom:9px; box-shadow:var(--shadow-sm); cursor:pointer}
+  .rec .cover{width:48px;height:66px;font-size:20px}
+  .rec-title{font-size:14px; font-weight:800; margin:0 0 2px; line-height:1.3; letter-spacing:-.02em}
+  .rec-meta{font-size:11.5px; color:var(--muted)}
+  .rec-flags{font-size:11px; color:var(--brand-2); font-weight:700; margin-top:3px}
+
+  /* tree */
+  .tree-wrap{position:relative; background:linear-gradient(180deg,#f2f8f3 0%,#f7f6ec 62%,#f4efe0 100%);
+    border:1px solid var(--line); border-radius:20px; overflow:hidden; box-shadow:var(--shadow-sm); margin-bottom:12px}
+  .tree-svg{display:block; width:100%; height:auto}
+  .goalbar{margin:2px 0 12px}
+  .goalbar .row{display:flex; align-items:baseline; justify-content:space-between; font-size:12.5px; color:var(--muted); margin-bottom:6px}
+  .goalbar .row b{color:var(--brand-ink); font-weight:800; font-size:13.5px}
+  .bar{height:11px; border-radius:999px; background:#e8e2d3; overflow:hidden}
+  .bar i{display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,var(--brand-2),var(--brand)); transition:width .4s ease}
+  .legend{display:flex; flex-wrap:wrap; gap:9px; font-size:11px; color:var(--muted); margin-top:9px}
+  .legend span{display:inline-flex; align-items:center; gap:4px}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+  /* sheet */
+  .backdrop{position:fixed; inset:0; background:rgba(30,28,24,.42); z-index:40; opacity:0; transition:opacity .2s}
+  .backdrop.show{opacity:1}
+  .sheet{position:fixed; left:50%; bottom:0; transform:translate(-50%,102%); width:100%; max-width:440px;
+    max-height:92dvh; overflow-y:auto; background:var(--paper); z-index:50; border-radius:22px 22px 0 0;
+    box-shadow:0 -12px 40px rgba(0,0,0,.18); transition:transform .26s cubic-bezier(.3,.9,.3,1);
+    padding-bottom:calc(20px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling:touch}
+  .sheet.show{transform:translate(-50%,0)}
+  .sheet-grab{width:40px;height:4px;border-radius:99px;background:#d8d2c2;margin:10px auto 4px}
+  .sheet-in{padding:8px 18px 10px}
+  .sheet h3{font-size:18px; font-weight:800; letter-spacing:-.03em; margin:6px 0 3px}
+  .field{margin:12px 0}
+  .field label{display:block; font-size:12.5px; font-weight:700; color:#5f5b4e; margin-bottom:5px; letter-spacing:-.01em}
+  .field input, .field textarea, .field select{width:100%; border:1px solid var(--line); background:#fffdf9;
+    border-radius:11px; padding:11px 12px; font-size:14.5px; font-family:inherit; color:var(--ink); outline:none}
+  .field input:focus, .field textarea:focus{border-color:var(--brand-2); box-shadow:0 0 0 3px rgba(61,118,173,.13)}
+  .field textarea{resize:vertical; min-height:64px; line-height:1.5}
+  .hint{font-size:11.5px; color:var(--muted); margin-top:5px; line-height:1.45}
+  .check{display:flex; align-items:center; gap:9px; padding:10px 12px; border:1px solid var(--line);
+    border-radius:12px; background:#fffdf9; margin-bottom:7px; cursor:pointer; font-size:14px; font-weight:600}
+  .check input{width:19px;height:19px; accent-color:var(--brand); flex:none}
+  .check.on{background:var(--brand-soft); border-color:#c7dcef}
+  .counter{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+  .counter button{width:38px;height:38px;border-radius:11px;border:1px solid var(--line); background:#fff; font-size:18px;
+    font-weight:700; cursor:pointer; color:var(--ink)}
+  .counter b{font-size:17px; min-width:26px; text-align:center}
+  .acts li{list-style:none; display:flex; gap:9px; padding:10px 0; border-bottom:1px dashed var(--line); font-size:13.5px; line-height:1.5}
+  .acts{padding:0; margin:0}
+  .acts li:last-child{border-bottom:0}
+  .acts input{width:19px;height:19px; accent-color:var(--green); margin-top:2px; flex:none}
+  .word-row{display:flex; gap:6px; margin-bottom:6px}
+  .word-row input{flex:1}
+  .linkrow{display:flex; gap:7px; flex-wrap:wrap; margin:10px 0 4px}
+  .linkrow .btn{flex:1 1 46%}
+  .stars{display:flex; gap:6px; font-size:24px; cursor:pointer; user-select:none}
+  .stars span{opacity:.25}
+  .stars span.on{opacity:1}
+
+  .tabbar{position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:100%; max-width:440px; z-index:35;
+    background:rgba(255,253,249,.96); backdrop-filter:blur(12px); border-top:1px solid var(--line);
+    display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .tab-btn{flex:1; border:0; background:transparent; font-family:inherit; color:var(--muted); cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 2px; border-radius:12px}
+  .tab-btn .tab-ico{width:22px;height:22px}
+  .tab-label{font-size:10.5px; font-weight:700; letter-spacing:-.01em}
+  .tab-btn.is-active{color:var(--brand)}
+  .toast{position:fixed; left:50%; bottom:calc(96px + env(safe-area-inset-bottom)); transform:translate(-50%,14px);
+    background:rgba(38,36,30,.93); color:#fff; font-size:13px; font-weight:600; padding:10px 16px; border-radius:12px;
+    opacity:0; pointer-events:none; transition:.22s; z-index:60; max-width:340px; text-align:center}
+  .toast.show{opacity:1; transform:translate(-50%,0)}
+  #reader{width:100%; border-radius:14px; overflow:hidden; background:#0d0d0d; margin-bottom:8px; min-height:0}
+  #reader video{border-radius:14px}
+  .empty{text-align:center; color:var(--muted); font-size:13px; padding:26px 10px; line-height:1.6}
+  .note{font-size:11.5px; color:#8a8577; line-height:1.5; margin-top:8px}
+  .pill{display:inline-block; font-size:10.5px; font-weight:800; color:#96571c; background:var(--accent-soft);
+    border-radius:7px; padding:2px 6px; margin-left:4px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="appbar">
+    <div class="appbar-in">
+      <div class="brand">
+        <span class="brand-mark">🌳</span>
+        <div style="min-width:0">
+          <div class="brand-name">책자람 English</div>
+          <div class="brand-sub" id="brandSub">AR·렉사일 순서로 고르는 영어원서</div>
+        </div>
+      </div>
+      <button class="icon-btn" id="btnSettings" aria-label="설정">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+          <circle cx="12" cy="12" r="3.2"></circle>
+          <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.56V21a2 2 0 1 1-4 0v-.11a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1H3a2 2 0 1 1 0-4h.11A1.7 1.7 0 0 0 4.6 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 8.96 4.6 1.7 1.7 0 0 0 10 3.04V3a2 2 0 1 1 4 0v.11a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V10a1.7 1.7 0 0 0 1.56 1H21a2 2 0 1 1 0 4h-.11a1.7 1.7 0 0 0-1.49 1z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main" id="main">
+    <section id="tab-books" aria-label="추천도서"></section>
+    <section id="tab-library" aria-label="도서관 조회" hidden></section>
+    <section id="tab-scan" aria-label="바코드 등록" hidden></section>
+    <section id="tab-shelf" aria-label="내 책장" hidden></section>
+  </main>
+
+  <nav class="tabbar" role="tablist" aria-label="주요 메뉴">
+    <button class="tab-btn is-active" data-tab="books" role="tab" aria-selected="true">
+      <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5z"></path><path d="M4 20.5V5.5"></path><path d="M8 7h7"></path>
+      </svg><span class="tab-label">추천도서</span>
+    </button>
+    <button class="tab-btn" data-tab="library" role="tab" aria-selected="false">
+      <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 10.5 12 4l9 6.5"></path><path d="M5 10v9M9.5 10v9M14.5 10v9M19 10v9"></path><path d="M3 21h18"></path>
+      </svg><span class="tab-label">도서관</span>
+    </button>
+    <button class="tab-btn" data-tab="scan" role="tab" aria-selected="false">
+      <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"></path><path d="M8 8v8M11 8v8M14 8v8M17 8v8"></path>
+      </svg><span class="tab-label">바코드</span>
+    </button>
+    <button class="tab-btn" data-tab="shelf" role="tab" aria-selected="false">
+      <svg class="tab-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 20V11M9.3 20V5M14.7 20v-7M20 20V8"></path>
+      </svg><span class="tab-label">내 책장</span>
+    </button>
+  </nav>
+</div>
+
+<div class="backdrop" id="backdrop" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script defer src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* =========================================================
+     0. 데이터 · 저장소
+     ========================================================= */
+  var BOOKS = [{"id":"brown-bear","title":"Brown Bear, Brown Bear, What Do You See?","author":"Bill Martin Jr. · Eric Carle","isbn":"9780805047905","ar":1.5,"lex":"AD200L","il":"LG","pts":0.5,"pages":28,"pub":"Henry Holt","year":1967,"j":2,"theme":"색깔·동물·리듬","why":"“Brown bear, brown bear, what do you see?” 질문과 대답이 계속 이어지는 리듬 그림책. 색깔과 동물 이름을 처음 영어로 만나는 책.","acts":["동물 이름·색깔 단어를 소리 내어 따라 읽고, 마지막 “I see a teacher looking at me”를 “I see my mom”처럼 가족으로 바꿔 말하기","색종이로 동물 카드를 만들어 가족과 “What do you see?” 질문 놀이하기"]},{"id":"polar-bear","title":"Polar Bear, Polar Bear, What Do You Hear?","author":"Bill Martin Jr. · Eric Carle","isbn":"9780805053883","ar":2.1,"lex":"AD670L","il":"LG","pts":0.5,"pages":28,"pub":"Henry Holt","year":1991,"j":3,"theme":"동물·소리·의성어","why":"Brown Bear의 자매편. 동물들의 울음소리를 묻고 답하는 구조로 hear/sound 표현과 동물 소리를 배운다.","acts":["동물 울음소리를 영어로 흉내 내며 “What do you hear?” 놀이하기 (roar, snort, flute…)","“I hear a ___” 문장을 가족·친구로 바꿔 5문장 말해 보기"]},{"id":"hungry-caterpillar","title":"The Very Hungry Caterpillar","author":"Eric Carle","isbn":"9780399226908","ar":2.9,"lex":"AD460L","il":"LG","pts":0.5,"pages":26,"pub":"Philomel","year":1969,"j":4,"theme":"성장·요일·음식","why":"배고픈 애벌레가 요일마다 음식을 먹고 마침내 나비가 되는 이야기. 요일·숫자·음식 단어가 반복된다.","acts":["요일별로 먹은 음식을 영어로 다시 말하기 (On Monday he ate through one apple)","종이로 애벌레와 나비를 만들어 성장 과정을 순서대로 말하기"]},{"id":"dear-zoo","title":"Dear Zoo","author":"Rod Campbell","isbn":"9780027164404","ar":1.6,"lex":"150L","il":"LG","pts":0.5,"pages":24,"pub":"Little Simon","year":1982,"j":3,"theme":"동물·형용사·플랩북","why":"동물원에 편지를 보내 애완동물을 부탁하지만 매번 조건에 맞지 않아 돌려보내는 이야기. 형용사와 동물 이름이 반복된다.","acts":["“He was too ___” 문장으로 동물마다 이유 말하기 (too big, too tall, too fierce)","내가 애완동물로 받고 싶은 동물을 골라 “I would keep it because ___”로 말하기"]},{"id":"goodnight-moon","title":"Goodnight Moon","author":"Margaret Wise Brown","isbn":"9780064430173","ar":1.8,"lex":"AD360L","il":"LG","pts":0.5,"pages":32,"pub":"HarperCollins","year":1947,"j":3,"theme":"잠자리·리듬·사물","why":"잠자리에 든 아기 토끼가 방 안의 사물과 달, 별에게 차례로 인사하는 책. 느린 리듬과 반복 표현이 편안하다.","acts":["방 안 물건을 하나씩 가리키며 “Goodnight ___” 말하기","내 방에 있는 것 다섯 개를 영어로 적고 잠자리 인사 문장 만들기"]},{"id":"snowy-day","title":"The Snowy Day","author":"Ezra Jack Keats","isbn":"9780140501827","ar":2.5,"lex":"AD500L","il":"LG","pts":0.5,"pages":40,"pub":"Puffin","year":1962,"j":3,"theme":"겨울·눈·감각","why":"눈 내린 아침, 피터가 눈을 밟고 눈사람을 만드는 하루. 겨울 풍경과 감각 표현이 담담하게 이어진다.","acts":["“crunch, crunch”처럼 눈 밟는 소리를 나타내는 영어 표현 찾아 말하기","눈 내린 날의 하루를 “First I ___, then I ___”로 세 문장 쓰기"]},{"id":"wild-things","title":"Where the Wild Things Are","author":"Maurice Sendak","isbn":"9780064431781","ar":3.4,"lex":"AD740L","il":"LG","pts":0.5,"pages":48,"pub":"HarperCollins","year":1963,"j":4,"theme":"상상·감정·가족","why":"장난을 친 맥스가 괴물의 나라로 떠나 왕이 되었다가 결국 따뜻한 저녁밥이 있는 집으로 돌아온다.","acts":["괴물들의 “Let the wild rumpus start!” 장면을 온몸으로 역할극 하기","나만의 괴물 나라를 그리고 “In my land, ___”로 규칙 세 가지 영어로 말하기"]},{"id":"five-monkeys","title":"Five Little Monkeys Jumping on the Bed","author":"Eileen Christelow","isbn":"9780395557013","ar":1.4,"lex":"310L","il":"LG","pts":0.5,"pages":32,"pub":"Clarion","year":1989,"j":2,"theme":"숫자·반복·노래","why":"침대 위에서 다섯 원숭이가 뛰다가 하나씩 떨어지는 노래 같은 그림책. 숫자 세기와 반복 문장이 중심이다.","acts":["“Five little monkeys jumping on the bed” 노래를 손가락으로 숫자 세며 부르기","one~five를 세며 “___ little monkeys” 문장으로 직접 바꿔 부르기"]},{"id":"go-dog-go","title":"Go, Dog. Go!","author":"P.D. Eastman","isbn":"9780394800202","ar":1.2,"lex":"240L","il":"LG","pts":0.5,"pages":72,"pub":"Random House","year":1961,"j":2,"theme":"반대말·자동차·색","why":"개들이 자동차를 타고 어디론가 달려가는 짧은 문장 책. 반대말·색깔·위치 표현이 반복된다.","acts":["big/small, up/down, in/out 같은 반대말 짝을 만들어 말하기","집 안 물건으로 “on the ___”, “under the ___” 위치 문장 놀이하기"]},{"id":"hop-on-pop","title":"Hop on Pop","author":"Dr. Seuss","isbn":"9780394800295","ar":1.5,"lex":"190L","il":"LG","pts":0.5,"pages":72,"pub":"Random House","year":1963,"j":2,"theme":"라임·짧은 모음","why":"짧은 모음과 라임이 반복되는 초보 읽기 책. 소리 내어 읽기의 첫 단계로 좋다.","acts":["라임이 맞는 단어 짝 찾기 (hop/pop, cup/pup)","같은 라임으로 “___ on ___” 문장을 새로 만들어 읽기"]},{"id":"green-eggs","title":"Green Eggs and Ham","author":"Dr. Seuss","isbn":"9780394800165","ar":1.5,"lex":"210L","il":"LG","pts":0.5,"pages":72,"pub":"Random House","year":1960,"j":2,"theme":"반복·시도·음식","why":"“I do not like them, Sam-I-am”이 계속 반복되며 결국 맛을 보게 되는 이야기. 짧은 문장이 반복된다.","acts":["“I do not like ___” 문장으로 내가 싫어하는 음식 말하기","“in a house, with a mouse”처럼 장소·친구를 바꿔가며 문장 늘리기"]},{"id":"cat-in-the-hat","title":"The Cat in the Hat","author":"Dr. Seuss","isbn":"9780394800011","ar":2.1,"lex":"430L","il":"LG","pts":0.5,"pages":72,"pub":"Random House","year":1957,"j":3,"theme":"라임·집·장난","why":"비 오는 날 집에 온 고양이가 온갖 장난을 벌이는 라임 이야기. 짧은 문장과 리듬이 살아 있다.","acts":["라임 단어를 찾아 소리 내어 읽고, 같은 라임의 새 단어 만들기","집에 초대하고 싶은 상상 속 친구를 그리고 “He would ___”로 소개하기"]},{"id":"are-you-my-mother","title":"Are You My Mother?","author":"P.D. Eastman","isbn":"9780394800189","ar":1.6,"lex":"240L","il":"LG","pts":0.5,"pages":72,"pub":"Random House","year":1960,"j":3,"theme":"가족·질문·반복","why":"둥지에서 떨어진 새끼 새가 엄마를 찾아 묻고 다니는 이야기. “Are you my mother?”가 반복된다.","acts":["동물마다 “Are you my mother?” / “No, I am a ___” 역할극 하기","엄마를 닮은 점 세 가지를 영어로 “My mom is ___” 문장 만들기"]},{"id":"biscuit","title":"Biscuit","author":"Alyssa Satin Capucilli","isbn":"9780064442121","ar":1.4,"lex":"190L","il":"LG","pts":0.5,"pages":32,"pub":"HarperCollins","year":1996,"j":2,"theme":"강아지·잠자리·반복","why":"잠자리에 들기 싫어하는 강아지 비스킷과 아이의 짧은 대화. 반복되는 짧은 문장이 첫 읽기에 좋다.","acts":["“Woof, woof!” 대신 “Time for bed, Biscuit”을 번갈아 역할극 하기","우리 집 반려동물(또는 인형)에게 영어로 잘 자라고 말해 보기"]},{"id":"bathtime-biscuit","title":"Bathtime for Biscuit","author":"Alyssa Satin Capucilli","isbn":"9780064442640","ar":1.1,"lex":"150L","il":"LG","pts":0.5,"pages":32,"pub":"HarperCollins","year":1998,"j":2,"theme":"강아지·목욕·반복","why":"비스킷이 목욕을 피해 도망다니는 짧은 이야기. 현재형 문장이 반복된다.","acts":["“Biscuit wants to ___” 문장을 다섯 개 말하기","목욕 순서를 영어로 말하기 (get in, splash, dry off, shake)"]},{"id":"biscuit-friend","title":"Biscuit Finds a Friend","author":"Alyssa Satin Capucilli","isbn":"9780064442435","ar":0.8,"lex":"210L","il":"LG","pts":0.5,"pages":32,"pub":"HarperCollins","year":1997,"j":1,"theme":"강아지·친구·반복","why":"비스킷이 길 잃은 새끼 오리를 만나 집으로 데려다주는 이야기. 아주 짧은 문장으로 이루어져 있다.","acts":["“Woof! Woof!” 소리와 함께 “What is it?” “It is a ___” 문장 연습하기","친구를 도와준 경험을 한 문장 영어로 말하기"]},{"id":"david-school","title":"David Goes to School","author":"David Shannon","isbn":"9780590480871","ar":0.9,"lex":"210L","il":"LG","pts":0.5,"pages":32,"pub":"Blue Sky Press","year":1999,"j":1,"theme":"행동·학교·반복","why":"학교에서 자꾸 장난을 치는 데이비드에게 선생님이 \"No, David!\"를 외치는 이야기. 짧은 문장과 익살스러운 그림으로 학교 규칙을 영어로 배운다.","acts":["장면마다 \"No, David!\" 대신 할 수 있는 바른 행동을 영어로 말하기","\"Please ___, David\"처럼 부탁하는 문장을 세 개 만들어 보기"]},{"id":"pete-cat-shoes","title":"Pete the Cat: I Love My White Shoes","author":"Eric Litwin","isbn":"9780061906220","ar":1.5,"lex":"AD460L","il":"LG","pts":0.5,"pages":40,"pub":"HarperCollins","year":2010,"j":2,"theme":"노래·색깔·긍정","why":"새 신발이 딸기·블루베리·진흙에 젖어도 “It's all good”이라며 노래하는 고양이 이야기.","acts":["“I love my ___ shoes” 노래를 색깔 바꿔 부르기","기분이 나빠질 일을 “It's all good”으로 바꿔 말하는 연습하기"]},{"id":"pete-cat-buttons","title":"Pete the Cat and His Four Groovy Buttons","author":"Eric Litwin","isbn":"9780062110589","ar":2.2,"lex":"AD350L","il":"LG","pts":0.5,"pages":40,"pub":"HarperCollins","year":2012,"j":3,"theme":"숫자·노래·긍정","why":"단추가 하나씩 떨어질 때마다 숫자를 세며 노래하는 책. 빼기 개념과 긍정 문장이 함께 나온다.","acts":["단추가 떨어질 때마다 “Four/Three/Two/One” 숫자를 영어로 세기","“Buttons come and buttons go” 문장을 따라 읽고 내 물건으로 바꿔 말하기"]},{"id":"we-are-in-a-book","title":"We Are in a Book!","author":"Mo Willems","isbn":"9781423133087","ar":0.9,"lex":"200L","il":"LG","pts":0.5,"pages":64,"pub":"Hyperion","year":2010,"j":1,"theme":"책·대화·유머","why":"제럴드와 피기에게 독자가 보인다는 사실을 깨닫는 이야기. 아주 짧은 대사로 대화체를 배운다.","acts":["책 속 인물에게 말을 거는 문장 “Hello, reader!” “Can you say ___?” 역할극 하기","내 이름을 넣어 “I am in a book!” 문장으로 짧은 대사 만들기"]},{"id":"bird-on-head","title":"There Is a Bird on Your Head!","author":"Mo Willems","isbn":"9781423106869","ar":1.0,"lex":"210L","il":"LG","pts":0.5,"pages":64,"pub":"Hyperion","year":2007,"j":2,"theme":"대화·문제해결·유머","why":"머리에 새가 앉은 제럴드와 피기의 짧은 대화. 문제를 하나씩 해결하는 과정이 극적으로 이어진다.","acts":["“There is a ___ on your ___” 문장으로 물건을 옮겨 가며 놀이하기","문제가 생겼을 때 “What should I do?” “Maybe ___” 대화 만들기"]},{"id":"play-outside","title":"Are You Ready to Play Outside?","author":"Mo Willems","isbn":"9781423113478","ar":0.6,"lex":"140L","il":"LG","pts":0.5,"pages":64,"pub":"Hyperion","year":2008,"j":1,"theme":"날씨·감정·친구","why":"비가 와서 화가 난 제럴드와 피기가 함께 놀며 기분이 풀리는 이야기. 아주 짧은 문장과 감정 표현이 담겼다.","acts":["“I am happy / sad / angry” 감정 말을 얼굴 표정과 함께 연습하기","비 오는 날 할 수 있는 놀이를 영어로 세 가지 말하기"]},{"id":"throw-ball","title":"Watch Me Throw the Ball!","author":"Mo Willems","isbn":"9781423113485","ar":1.0,"lex":"280L","il":"LG","pts":0.5,"pages":64,"pub":"Hyperion","year":2009,"j":2,"theme":"놀이·자신감·대화","why":"피기가 공을 던지며 “Watch me!”를 외치는 이야기. 자신감과 격려의 표현이 반복된다.","acts":["“Watch me!” “Good job!” “Try again!” 응원 문장 주고받기","공 던지기 놀이하며 “I can throw the ball!” 소리 내어 말하기"]},{"id":"pigeon-hotdog","title":"The Pigeon Finds a Hot Dog!","author":"Mo Willems","isbn":"9780786818693","ar":1.0,"lex":"AD410L","il":"LG","pts":0.5,"pages":40,"pub":"Hyperion","year":2004,"j":2,"theme":"욕심·대화·유머","why":"핫도그를 발견한 비둘기와 오리가 나눠 먹는 방법을 두고 벌이는 대화. 대사가 짧고 표정이 살아 있다.","acts":["“It's mine!” “Can I have a bite?” 대화를 역할 나눠 읽기","좋아하는 간식을 나눠 먹는 상황을 영어 세 문장으로 만들기"]},{"id":"pigeon-bus","title":"Don't Let the Pigeon Drive the Bus!","author":"Mo Willems","isbn":"9780786819881","ar":0.9,"lex":"AD280L","il":"LG","pts":0.5,"pages":40,"pub":"Hyperion","year":2003,"j":1,"theme":"부탁·거절·유머","why":"운전기사가 없을 때 비둘기가 버스를 몰겠다고 조르는 이야기. 독자에게 말을 거는 구성이 재미있다.","acts":["비둘기의 부탁을 “No!” “Sorry, you can't”로 거절하는 역할극 하기","“Can I ___?” 부탁 문장과 “Yes, you can / No, you can't” 대답 연습"]},{"id":"knuffle-bunny","title":"Knuffle Bunny","author":"Mo Willems","isbn":"9780786818709","ar":1.6,"lex":"460L","il":"LG","pts":0.5,"pages":40,"pub":"Hyperion","year":2004,"j":3,"theme":"가족·분실·감정","why":"토끼 인형을 세탁소에 두고 온 트릭시가 말 대신 “Aggle flaggle klabble!”로 속마음을 표현한다.","acts":["말이 나오기 전 아기처럼 감정을 소리로 표현하고, 그 뜻을 영어로 말해 보기","“Where is my ___?” “I found it!” 문장으로 물건 찾기 놀이"]},{"id":"mama-llama","title":"Is Your Mama a Llama?","author":"Deborah Guarino","isbn":"9780439598422","ar":1.6,"lex":"290L","il":"LG","pts":0.5,"pages":32,"pub":"Scholastic","year":1989,"j":3,"theme":"동물·수수께끼·라임","why":"라마가 친구들에게 “Is your mama a llama?”라고 묻고 동물마다 엄마의 모습을 설명하는 수수께끼 같은 책.","acts":["동물마다 엄마의 특징을 듣고 어떤 동물인지 맞히는 영어 수수께끼 놀이","“My mama is a ___”로 우리 엄마를 소개하는 문장 만들기"]},{"id":"bear-snores-on","title":"Bear Snores On","author":"Karma Wilson","isbn":"9780689831874","ar":2.2,"lex":"AD470L","il":"LG","pts":0.5,"pages":32,"pub":"Margaret K. McElderry","year":2002,"j":3,"theme":"겨울잠·친구·의성어","why":"곰이 겨울잠을 자는 동안 동물들이 곰의 굴에 모여 파티를 연다. 의성어와 라임이 풍부하다.","acts":["곰의 코 고는 소리와 동물 소리를 영어 의성어로 찾아 말하기","“Bear snores on” 문장을 다른 동물로 바꿔 “___ sleeps on” 만들기"]},{"id":"gruffalo","title":"The Gruffalo","author":"Julia Donaldson","isbn":"9780803731097","ar":2.3,"lex":"AD510L","il":"LG","pts":0.5,"pages":32,"pub":"Dial Books","year":1999,"j":3,"theme":"상상·지혜·숲","why":"작은 생쥐가 상상 속 괴물 그루팔로를 내세워 숲속 동물들을 물리치는 이야기. 라임이 경쾌하다.","acts":["생쥐가 괴물을 설명하는 문장 “He has ___”를 따라 읽고 내 괴물 묘사하기","“A mouse took a stroll in the deep dark wood”를 소리 내어 읽고 장면 그리기"]},{"id":"room-broom","title":"Room on the Broom","author":"Julia Donaldson","isbn":"9780803726574","ar":3.7,"lex":"600L","il":"LG","pts":0.5,"pages":32,"pub":"Dial Books","year":2001,"j":5,"theme":"마녀·나눔·라임","why":"마녀의 빗자루에 동물들이 하나둘 타며 자리가 모자라도 함께 나누는 이야기. 라임과 반복 구조가 좋다.","acts":["“Is there room on the broom?” 문장을 동물 이름 바꿔 말하기","빗자루에 타고 싶은 동물과 이유를 “I want to ride because ___”로 말하기"]},{"id":"bear-hunt","title":"We're Going on a Bear Hunt","author":"Michael Rosen","isbn":"9780689815812","ar":1.3,"lex":"280L","il":"LG","pts":0.5,"pages":36,"pub":"Margaret K. McElderry","year":1989,"j":2,"theme":"모험·의성어·가족","why":"가족이 곰을 찾아 나서며 풀밭·강·진흙·눈보라를 지나는 이야기. 의성어가 반복된다.","acts":["장면마다 나오는 의성어(swishy swashy, splash splosh)를 몸짓과 함께 말하기","“We're going on a ___ hunt” 문장을 다른 목적지로 바꿔 말하기"]},{"id":"napping-house","title":"The Napping House","author":"Audrey Wood","isbn":"9780152567088","ar":2.8,"lex":"NP260L","il":"LG","pts":0.5,"pages":32,"pub":"HMH","year":1984,"j":4,"theme":"누적구조·잠·유머","why":"한 집에서 모두가 잠든 위에 벼룩이 올라가고 고양이가 뛰어내리며 벌어지는 누적 구조 그림책.","acts":["“There is a ___ on a ___” 누적 문장을 순서대로 따라 말하기","우리 집 식구를 크기 순서로 늘어놓고 영어로 쌓기 문장 만들기"]},{"id":"mouse-cookie","title":"If You Give a Mouse a Cookie","author":"Laura Numeroff","isbn":"9780060245863","ar":2.7,"lex":"AD410L","il":"LG","pts":0.5,"pages":40,"pub":"HarperCollins","year":1985,"j":4,"theme":"인과·순서·유머","why":"쿠키를 준 생쥐가 우유를 달라 하고, 또 다음을 달라 하며 끝없이 이어지는 원인-결과 이야기.","acts":["“If you give a ___ a ___, he will ___” 문장을 다른 동물로 만들어 보기","이야기 순서를 first, then, next, finally로 정리해 말하기"]},{"id":"olivia","title":"Olivia","author":"Ian Falconer","isbn":"9780689829536","ar":2.0,"lex":"AD470L","il":"LG","pts":0.5,"pages":40,"pub":"Atheneum","year":2000,"j":3,"theme":"개성·가족·일상","why":"에너지 넘치는 아기 돼지 올리비아의 하루. 짧은 문장과 유머로 자기 표현을 배운다.","acts":["올리비아처럼 “I am good at ___”로 내가 잘하는 것 말하기","하루 일과를 영어로 “First I ___, then I ___”로 세 문장 말하기"]},{"id":"corduroy","title":"Corduroy","author":"Don Freeman","isbn":"9780670241330","ar":3.5,"lex":"600L","il":"LG","pts":0.5,"pages":32,"pub":"Viking","year":1968,"j":4,"theme":"친구·소망·백화점","why":"단추가 떨어진 곰 인형 코듀로이가 밤의 백화점을 돌아다니며 친구를 만나는 이야기.","acts":["코듀로이가 물었던 “I guess I've always wanted a friend”를 따라 읽고 내 친구 이야기하기","“Where is my button?” 물건 찾기 놀이를 영어로 하기"]},{"id":"caps-for-sale","title":"Caps for Sale","author":"Esphyr Slobodkina","isbn":"9780064431439","ar":3.1,"lex":"AD480L","il":"LG","pts":0.5,"pages":48,"pub":"HarperCollins","year":1940,"j":4,"theme":"반복·동물·유머","why":"모자를 팔던 아저씨가 나무에서 자다가 원숭이들에게 모자를 모두 빼앗기는 이야기. 반복 동작이 재미있다.","acts":["원숭이 흉내를 내며 “You monkeys, you!” 대사를 따라 말하기","색깔 모자 열 개를 세며 “red caps, blue caps” 영어로 말하기"]},{"id":"blueberries-sal","title":"Blueberries for Sal","author":"Robert McCloskey","isbn":"9780140501698","ar":4.1,"lex":"AD800L","il":"LG","pts":0.5,"pages":64,"pub":"Puffin","year":1948,"j":5,"theme":"가족·숲·만남","why":"살과 아기 곰이 블루베리를 따다 서로 엄마를 바꿔 만나는 이야기. 잔잔한 문장 속에 긴장이 있다.","acts":["“kerplink, kerplank, kerplunk” 소리를 따라 읽고 장면 상상하기","엄마와 내가 닮은 점을 영어로 “We both like ___”로 말하기"]},{"id":"make-way","title":"Make Way for Ducklings","author":"Robert McCloskey","isbn":"9780140561821","ar":4.1,"lex":"800L","il":"LG","pts":0.5,"pages":64,"pub":"Puffin","year":1941,"j":5,"theme":"가족·도시·안전","why":"오리 가족이 보스턴 거리를 건너 연못에 도착하기까지의 이야기. 경찰의 도움 장면이 유명하다.","acts":["오리 새끼 이름 여덟 개(Jack, Kack, Lack…)를 리듬에 맞춰 말하기","길을 건널 때 필요한 영어 표현 “Look both ways” 익히기"]},{"id":"strega-nona","title":"Strega Nona","author":"Tomie dePaola","isbn":"9780671662837","ar":3.9,"lex":"AD730L","il":"LG","pts":0.5,"pages":40,"pub":"Simon & Schuster","year":1975,"j":5,"theme":"마법·욕심·교훈","why":"마법 냄비를 함부로 쓴 빅 앤서니 때문에 마을이 파스타로 가득 차는 이야기. 욕심과 책임을 다룬다.","acts":["“The pot began to bubble and boil” 장면을 소리 내어 읽고 요리 흉내 내기","욕심을 부렸던 경험과 그 결과를 영어로 한 문장씩 말하기"]},{"id":"ferdinand","title":"The Story of Ferdinand","author":"Munro Leaf","isbn":"9780670674244","ar":3.7,"lex":"760L","il":"LG","pts":0.5,"pages":32,"pub":"Viking","year":1936,"j":5,"theme":"평화·개성·스페인","why":"싸움보다 꽃 냄새 맡기를 좋아하는 황소 페르디난드 이야기. 있는 그대로의 자신을 인정하는 책.","acts":["“He liked to smell the flowers” 문장을 따라 읽고 내가 좋아하는 것을 영어로 말하기","싸움 대신 평화를 택한 이유를 “I choose ___ because ___”로 말하기"]},{"id":"harry-dog","title":"Harry the Dirty Dog","author":"Gene Zion","isbn":"9780064430098","ar":3.1,"lex":"AD520L","il":"LG","pts":0.5,"pages":32,"pub":"HarperCollins","year":1956,"j":4,"theme":"가족·목욕·유머","why":"목욕이 싫어 도망간 해리가 너무 더러워져 가족이 알아보지 못하는 이야기. 반전이 유쾌하다.","acts":["“Harry was a white dog with black spots” 문장을 그림 보며 따라 읽기","내 반려동물(또는 좋아하는 동물)을 영어로 묘사하기"]},{"id":"mike-mulligan","title":"Mike Mulligan and His Steam Shovel","author":"Virginia Lee Burton","isbn":"9780395259399","ar":4.4,"lex":"580L","il":"LG","pts":0.5,"pages":48,"pub":"HMH","year":1939,"j":5,"theme":"기계·성실·변화","why":"증기 삽차 메리 앤이 마지막 힘을 다해 시청을 파는 이야기. 성실과 우정을 담았다.","acts":["“Mike and Mary Anne”이 한 일을 순서대로 영어로 정리하기","쓸모가 없어진 물건이 새로 쓰일 방법을 상상해 영어로 말하기"]},{"id":"alexander","title":"Alexander and the Terrible, Horrible, No Good, Very Bad Day","author":"Judith Viorst","isbn":"9780689711732","ar":3.7,"lex":"AD840L","il":"LG","pts":0.5,"pages":32,"pub":"Atheneum","year":1972,"j":5,"theme":"감정·하루·공감","why":"알렉산더의 최악의 하루를 유머러스하게 그린 책. 감정과 형용사가 풍부하다.","acts":["“It was a terrible, horrible, no good, very bad day”를 리듬 살려 읽기","내가 겪은 힘든 날을 영어 형용사로 세 개 골라 표현하기"]},{"id":"chrysanthemum","title":"Chrysanthemum","author":"Kevin Henkes","isbn":"9780688147327","ar":3.3,"lex":"570L","il":"LG","pts":0.5,"pages":32,"pub":"Greenwillow","year":1991,"j":4,"theme":"이름·자존감·친구","why":"이름이 길어 놀림받던 크리산썸이 이름을 다시 사랑하게 되는 이야기.","acts":["내 이름의 뜻과 자랑거리를 영어로 “My name means ___”로 말하기","친구를 놀리지 않고 칭찬하는 영어 문장 세 개 만들기"]},{"id":"paper-bag-princess","title":"The Paper Bag Princess","author":"Robert Munsch","isbn":"9780833579102","ar":3.8,"lex":"550L","il":"LG","pts":0.5,"pages":32,"pub":"Annick Press","year":1980,"j":5,"theme":"용기·지혜·반전","why":"드래곤에게 잡힌 왕자를 종이봉투를 걸친 공주가 지혜로 구해내는 반전 동화.","acts":["“Elizabeth”가 드래곤을 속인 방법을 순서대로 영어로 말하기","왕자에게 하고 싶은 말을 “I think you are ___”로 영어 한 문장 쓰기"]},{"id":"sylvester","title":"Sylvester and the Magic Pebble","author":"William Steig","isbn":"9780671662691","ar":4.0,"lex":"AD780L","il":"LG","pts":0.5,"pages":32,"pub":"Simon & Schuster","year":1969,"j":5,"theme":"가족·소원·상실","why":"마법 조약돌을 주운 실베스터가 바위가 되어 가족과 헤어질 뻔하는 이야기.","acts":["“I wish ___” 소원 문장을 영어로 세 개 말하기","가족의 소중함을 “I miss ___ when ___” 문장으로 표현하기"]},{"id":"frog-toad-friends","title":"Frog and Toad Are Friends","author":"Arnold Lobel","isbn":"9780064440202","ar":2.9,"lex":"400L","il":"LG","pts":0.5,"pages":64,"pub":"HarperCollins","year":1970,"j":4,"theme":"친구·계절·짧은이야기","why":"개구리와 두꺼비의 다섯 가지 짧은 이야기. 친구 사이의 배려가 담백하게 담겼다.","acts":["이야기 하나를 골라 장면 순서를 first, then, last로 정리하기","친구에게 해 주고 싶은 말 “I am glad you are my friend” 따라 읽기"]},{"id":"frog-toad-together","title":"Frog and Toad Together","author":"Arnold Lobel","isbn":"9780881037814","ar":2.9,"lex":"330L","il":"LG","pts":0.5,"pages":64,"pub":"HarperCollins","year":1972,"j":4,"theme":"친구·절제·유머","why":"쿠키를 참기, 용기 내기 등 우정 속의 작은 갈등을 다룬 짧은 이야기 모음.","acts":["“Cookies” 이야기에서 두꺼비가 참은 방법을 영어로 말하기","내가 참아야 했던 일을 “I wanted to ___, but I ___”로 쓰기"]},{"id":"little-bear","title":"Little Bear","author":"Else Holmelund Minarik","isbn":"9780064440042","ar":2.4,"lex":"370L","il":"LG","pts":0.5,"pages":64,"pub":"HarperCollins","year":1957,"j":3,"theme":"가족·상상·초급리더","why":"곰 가족의 따뜻한 짧은 이야기들. 초급 리더의 고전으로 문장이 짧다.","acts":["“I am cold / hungry / sleepy” 감각 문장을 역할극으로 말하기","리틀 베어처럼 “Can I have ___?” 부탁 문장 연습하기"]},{"id":"amelia-bedelia","title":"Amelia Bedelia","author":"Peggy Parish","isbn":"9780064441551","ar":2.5,"lex":"340L","il":"LG","pts":0.5,"pages":64,"pub":"HarperCollins","year":1963,"j":3,"theme":"말장난·유머·집안일","why":"지시를 글자 그대로 실행해 웃음을 만드는 아멜리아 베델리아 이야기. 다의어를 배우기 좋다.","acts":["“Draw the curtains”처럼 두 가지로 해석되는 표현 찾아 뜻 비교하기","집안일 영어 표현 다섯 개를 익혀 따라 말하기"]},{"id":"henry-mudge","title":"Henry and Mudge: The First Book","author":"Cynthia Rylant","isbn":"9780689810053","ar":2.7,"lex":"460L","il":"LG","pts":0.5,"pages":40,"pub":"Simon & Schuster","year":1987,"j":4,"theme":"반려견·가족·성장","why":"외로웠던 헨리가 큰 개 머지와 가족이 되는 이야기. 짧은 챕터로 이루어진 초급 리더.","acts":["헨리와 머지가 함께 한 일을 “They ___ together” 문장으로 정리하기","내가 갖고 싶은 반려동물과 이유를 영어로 말하기"]},{"id":"mr-putter","title":"Mr. Putter & Tabby Pour the Tea","author":"Cynthia Rylant","isbn":"9780152009014","ar":2.8,"lex":"540L","il":"LG","pts":0.5,"pages":44,"pub":"HMH","year":1994,"j":4,"theme":"노년·친구·차","why":"외로운 푸터 씨가 고양이 태비를 만나 함께 차를 마시는 이야기. 잔잔한 우정 이야기.","acts":["“They drank tea together” 장면을 배경 삼아 차 마시는 영어 표현 익히기","혼자보다 함께 할 때 좋은 점을 “It is better with ___”로 말하기"]},{"id":"nate-great","title":"Nate the Great","author":"Marjorie Weinman Sharmat","isbn":"9780440461265","ar":2.0,"lex":"340L","il":"LG","pts":0.5,"pages":80,"pub":"Yearling","year":1972,"j":3,"theme":"추리·관찰·유머","why":"사라진 그림을 찾는 꼬마 탐정 네이트 이야기. 단서를 정리하는 문장이 반복된다.","acts":["단서를 “First I found ___, then I found ___” 순서로 영어로 정리하기","“Nate the Great”처럼 내 이름으로 탐정 별명 만들고 “I am ___”로 소개하기"]},{"id":"nate-stolen-base","title":"Nate the Great and the Stolen Base","author":"Marjorie Weinman Sharmat","isbn":"9780440409328","ar":2.9,"lex":"530L","il":"LG","pts":0.5,"pages":80,"pub":"Yearling","year":1992,"j":4,"theme":"추리·야구·친구","why":"야구 시합 중 사라진 베이스를 찾는 네이트. 스포츠 영어 표현도 함께 배운다.","acts":["야구 영어 단어(base, bat, team)를 찾아 말하기","사라진 물건을 찾은 경험을 “I looked for ___ and found ___”로 쓰기"]},{"id":"mth-dinosaurs","title":"Dinosaurs Before Dark","author":"Mary Pope Osborne","isbn":"9780679824114","ar":2.6,"lex":"510L","il":"LG","pts":1.0,"pages":80,"pub":"Random House","year":1992,"j":4,"theme":"판타지·공룡·모험","why":"잭과 애니가 나무집을 타고 공룡 시대에 도착하며 시작되는 시리즈 1권.","acts":["책에 나온 공룡 이름을 영어로 말하고 크기 순서로 줄 세우기","“I would travel to ___”로 내가 가 보고 싶은 시대로 문장 만들기"]},{"id":"mth-knight","title":"The Knight at Dawn","author":"Mary Pope Osborne","isbn":"9780679824121","ar":2.9,"lex":"620L","il":"LG","pts":1.0,"pages":80,"pub":"Random House","year":1993,"j":4,"theme":"판타지·성·기사","why":"나무집을 타고 기사 시대에 간 잭과 애니의 두 번째 모험.","acts":["성 안에서 쓰이는 영어 단어(knight, castle, torch) 익히기","기사에게 묻고 싶은 질문 세 개를 영어로 만들기"]},{"id":"mth-mummies","title":"Mummies in the Morning","author":"Mary Pope Osborne","isbn":"9780679824244","ar":2.7,"lex":"500L","il":"LG","pts":1.0,"pages":80,"pub":"Random House","year":1993,"j":4,"theme":"판타지·이집트·미스터리","why":"고대 이집트로 간 남매가 미라와 마주하는 세 번째 모험.","acts":["이집트 관련 영어 단어(mummy, pyramid, queen)로 낱말 카드 만들기","“Can you help me?” “Yes, I can” 도움 대화 연습하기"]},{"id":"mth-pirates","title":"Pirates Past Noon","author":"Mary Pope Osborne","isbn":"9780679824251","ar":2.8,"lex":"490L","il":"LG","pts":1.0,"pages":80,"pub":"Random House","year":1994,"j":4,"theme":"판타지·해적·보물","why":"해적선에 올라탄 남매가 보물 지도를 따라가는 네 번째 모험.","acts":["해적 영어 표현(ahoy, treasure, ship)을 소리 내어 말하기","보물 지도를 그리고 “Go straight, turn left” 길 안내 영어로 말하기"]},{"id":"junie-b-bus","title":"Junie B. Jones and the Stupid Smelly Bus","author":"Barbara Park","isbn":"9780679826422","ar":2.9,"lex":"520L","il":"LG","pts":1.0,"pages":80,"pub":"Random House","year":1992,"j":4,"theme":"학교·감정·유머","why":"학교 버스가 싫은 주니 B.가 벌이는 첫날 소동. 아이의 속마음이 생생한 1인칭 문장으로 이어진다.","acts":["“I do not want to ___” 문장으로 내가 싫어하는 것을 말하기","버스에서 쓰는 영어 표현(sit down, hold on) 익히기"]},{"id":"junie-b-monkey","title":"Junie B. Jones and a Little Monkey Business","author":"Barbara Park","isbn":"9780679838869","ar":2.9,"lex":"540L","il":"LG","pts":1.0,"pages":80,"pub":"Random House","year":1993,"j":4,"theme":"가족·동생·유머","why":"동생이 태어나며 벌어지는 주니 B.의 오해와 소동. 가족 이야기 속에 감정 표현이 풍부하다.","acts":["“I have a little brother/sister”로 가족을 소개하는 문장 만들기","기분이 좋았다 나빴다 하는 장면을 찾아 감정 낱말로 정리하기"]},{"id":"cam-jansen","title":"Cam Jansen and the Mystery of the Stolen Diamonds","author":"David A. Adler","isbn":"9780142400104","ar":3.2,"lex":"590L","il":"LG","pts":1.0,"pages":64,"pub":"Puffin","year":1980,"j":4,"theme":"추리·기억·관찰","why":"사진처럼 기억하는 카메라 같은 기억력의 캠이 사라진 다이아몬드를 찾는 이야기.","acts":["“Click!” 하며 사진 찍듯 기억하는 놀이를 영어로 해 보기","장면을 보고 무엇이 사라졌는지 “I remember ___”로 말하기"]},{"id":"captain-underpants","title":"The Adventures of Captain Underpants","author":"Dav Pilkey","isbn":"9780590846288","ar":4.3,"lex":"720L","il":"MG","pts":1.0,"pages":128,"pub":"Scholastic","year":1997,"j":5,"theme":"유머·만화·학교","why":"장난으로 만든 만화 속 영웅이 실제로 나타나는 유쾌한 이야기. 만화 형식이라 읽기 부담이 적다.","acts":["이야기 속 만화 대사를 소리 내어 읽고 내 만화 대사 만들기","“If I had a superpower, I would ___” 문장으로 상상 표현하기"]},{"id":"flat-stanley","title":"Flat Stanley","author":"Jeff Brown","isbn":"9780061129049","ar":3.2,"lex":"550L","il":"LG","pts":1.0,"pages":72,"pub":"HarperCollins","year":1964,"j":4,"theme":"상상·여행·가족","why":"게시판에 눌려 납작해진 스탠리가 편지로 여행을 다니는 이야기.","acts":["납작해진 스탠리가 할 수 있는 일을 “He can ___”로 말하기","친구에게 엽서를 쓰듯 “Dear ___, I am in ___” 편지 쓰기"]},{"id":"boxcar-children","title":"The Boxcar Children","author":"Gertrude Chandler Warner","isbn":"9780807508527","ar":3.9,"lex":"580L","il":"MG","pts":2.0,"pages":176,"pub":"Albert Whitman","year":1942,"j":5,"theme":"가족·자립·미스터리","why":"부모를 잃은 네 남매가 화물차에서 살아가며 스스로를 돌보는 이야기. 시리즈의 시작.","acts":["네 남매가 스스로 해낸 일을 영어로 정리하기","살림에 필요한 영어 단어(bread, blanket, broom) 익히기"]},{"id":"my-fathers-dragon","title":"My Father's Dragon","author":"Ruth Stiles Gannett","isbn":"9780486837499","ar":5.6,"lex":"970L","il":"MG","pts":1.0,"pages":96,"pub":"Dover","year":1948,"j":7,"theme":"모험·동물·지혜","why":"아버지가 어릴 때 용을 구하러 섬에 간 모험담. 상상력과 문제 해결이 돋보인다.","acts":["아버지가 동물들에게 꺼낸 물건과 이유를 영어로 정리하기","“If I met a dragon, I would ___” 상상 문장 만들기"]},{"id":"charlottes-web","title":"Charlotte's Web","author":"E.B. White","isbn":"9780064410939","ar":4.4,"lex":"680L","il":"MG","pts":5.0,"pages":192,"pub":"HarperCollins","year":1952,"j":5,"theme":"우정·생명·희생","why":"거미 샬럿이 돼지 윌버를 살리기 위해 거미줄에 글자를 쓰는 이야기. 우정과 이별을 담은 고전.","acts":["샬럿이 거미줄에 쓴 단어들(some pig, terrific, radiant)의 뜻 찾기","가장 기억에 남는 장면을 영어 세 문장으로 요약하기"]},{"id":"stuart-little","title":"Stuart Little","author":"E.B. White","isbn":"9780812422818","ar":6.0,"lex":"920L","il":"MG","pts":3.0,"pages":144,"pub":"HarperCollins","year":1945,"j":7,"theme":"가족·모험·개성","why":"생쥐처럼 작은 스튜어트가 뉴욕에서 겪는 모험. 작은 존재의 용기를 그린다.","acts":["스튜어트가 작아서 할 수 있었던 일을 영어로 말하기","찾고 싶은 친구에게 보내는 “Dear ___, I am looking for you” 편지 쓰기"]},{"id":"trumpet-swan","title":"The Trumpet of the Swan","author":"E.B. White","isbn":"9780812427776","ar":4.9,"lex":"750L","il":"MG","pts":6.0,"pages":252,"pub":"HarperCollins","year":1970,"j":6,"theme":"자연·음악·노력","why":"소리가 나지 않는 백조 루이가 트럼펫으로 세상과 소통하는 이야기.","acts":["루이가 트럼펫을 배운 과정을 순서대로 영어로 정리하기","내가 노력해서 얻은 것을 “I practiced ___ and now I can ___”로 쓰기"]},{"id":"charlie-chocolate","title":"Charlie and the Chocolate Factory","author":"Roald Dahl","isbn":"9780142410318","ar":4.8,"lex":"810L","il":"MG","pts":5.0,"pages":192,"pub":"Puffin","year":1964,"j":6,"theme":"판타지·욕심·가족","why":"초콜릿 공장 초대장을 받은 찰리가 공장에서 겪는 신기한 모험. 유머와 풍자가 가득하다.","acts":["공장에서 나오는 간식 이름을 영어로 정리하고 내가 만들고 싶은 간식 소개하기","찰리가 가족을 생각한 장면을 읽고 “I would share ___ with ___” 문장 만들기"]},{"id":"matilda","title":"Matilda","author":"Roald Dahl","isbn":"9780142410370","ar":5.0,"lex":"840L","il":"MG","pts":6.0,"pages":256,"pub":"Puffin","year":1988,"j":6,"theme":"독서·용기·가족","why":"책을 사랑하는 소녀 마틸다가 특별한 힘으로 불공정에 맞서는 이야기.","acts":["마틸다가 읽은 책 목록을 영어로 적고 내가 읽고 싶은 책 소개하기","부당한 일을 겪었을 때 “That's not fair!” 대신 할 수 있는 말 만들기"]},{"id":"james-peach","title":"James and the Giant Peach","author":"Roald Dahl","isbn":"9780425287651","ar":4.8,"lex":"790L","il":"MG","pts":4.0,"pages":160,"pub":"Puffin","year":1961,"j":6,"theme":"모험·우정·상상","why":"거대한 복숭아를 타고 바다를 건너는 제임스와 곤충 친구들의 모험.","acts":["복숭아에 탄 친구들의 이름과 특징을 영어로 정리하기","내가 타고 떠나고 싶은 탈것을 “I would sail in ___”로 말하기"]},{"id":"bfg","title":"The BFG","author":"Roald Dahl","isbn":"9780142410387","ar":4.8,"lex":"720L","il":"MG","pts":6.0,"pages":224,"pub":"Puffin","year":1982,"j":6,"theme":"판타지·언어유희·용기","why":"거인 친구 BFG와 꿈을 모으는 소녀 소피의 이야기. 독특한 영어 단어 유희가 재미있다.","acts":["BFG식으로 만들어진 단어(snozzcumber, whizzpopper)의 뜻을 상상해 말하기","내가 만든 꿈을 영어로 “Tonight I will dream of ___”로 표현하기"]},{"id":"fantastic-mr-fox","title":"Fantastic Mr. Fox","author":"Roald Dahl","isbn":"9780142410349","ar":4.1,"lex":"600L","il":"MG","pts":2.0,"pages":112,"pub":"Puffin","year":1970,"j":5,"theme":"지혜·가족·모험","why":"농부 세 명을 상대로 꾀를 부리는 여우 아저씨 이야기. 빠른 전개가 장점이다.","acts":["여우가 농부들을 속인 방법을 순서대로 영어로 정리하기","“fantastic”처럼 칭찬하는 영어 형용사 다섯 개 익히기"]},{"id":"witches","title":"The Witches","author":"Roald Dahl","isbn":"9780142410110","ar":4.7,"lex":"740L","il":"MG","pts":5.0,"pages":224,"pub":"Puffin","year":1983,"j":6,"theme":"판타지·용기·유머","why":"마녀들이 아이들을 쥐로 바꾸는 계획을 막는 소년의 이야기. 긴장과 유머가 공존한다.","acts":["마녀를 알아보는 단서를 영어로 정리하기","무서운 상황에서 “Stay calm” “We can do this” 같은 안심 표현 익히기"]},{"id":"george-medicine","title":"George's Marvelous Medicine","author":"Roald Dahl","isbn":"9780142410356","ar":4.0,"lex":"640L","il":"MG","pts":2.0,"pages":112,"pub":"Puffin","year":1981,"j":5,"theme":"상상·유머·가족","why":"심술궂은 할머니를 위해 조지가 온갖 재료로 약을 만드는 이야기.","acts":["조지가 넣은 재료를 영어로 나열하고 내가 넣을 재료 말하기","“First, next, then, finally”로 만드는 과정 설명하기"]},{"id":"ramona-age8","title":"Ramona Quimby, Age 8","author":"Beverly Cleary","isbn":"9780380709564","ar":5.6,"lex":"860L","il":"MG","pts":4.0,"pages":208,"pub":"HarperCollins","year":1981,"j":7,"theme":"학교·가족·성장","why":"8살 라모나의 학교와 가족 이야기. 아이의 시선으로 성장의 순간을 담았다.","acts":["라모나가 겪은 사건을 시간 순서로 영어로 정리하기","“I felt ___ because ___” 감정 문장으로 내 하루 표현하기"]},{"id":"beezus-ramona","title":"Beezus and Ramona","author":"Beverly Cleary","isbn":"9780380709182","ar":4.8,"lex":"780L","il":"MG","pts":3.0,"pages":208,"pub":"HarperCollins","year":1955,"j":6,"theme":"자매·가족·이해","why":"동생 라모나 때문에 속상한 비저스가 언니로서 마음을 키워가는 이야기.","acts":["자매가 갈등한 장면과 화해한 장면을 영어로 비교해 말하기","형제·자매에게 미안했던 일을 “I am sorry I ___”로 쓰기"]},{"id":"sarah-plain-tall","title":"Sarah, Plain and Tall","author":"Patricia MacLachlan","isbn":"9780062399526","ar":3.4,"lex":"650L","il":"MG","pts":1.0,"pages":64,"pub":"HarperCollins","year":1985,"j":4,"theme":"가족·이주·마음","why":"편지로 만난 세라가 낯선 초원의 가족에게로 오는 이야기. 담담한 문장이 깊은 여운을 준다.","acts":["세라가 쓴 편지 내용을 영어로 다시 말하기","새로운 곳에 가 본 경험을 “At first I felt ___, but now ___”로 쓰기"]},{"id":"hundred-dresses","title":"The Hundred Dresses","author":"Eleanor Estes","isbn":"9780152052607","ar":5.4,"lex":"870L","il":"MG","pts":1.0,"pages":96,"pub":"HMH","year":1944,"j":6,"theme":"친구·편견·용기","why":"가난한 이웃을 놀리던 아이들이 뒤늦게 후회하는 이야기. 용기와 사과를 다룬다.","acts":["“I am sorry” 말이 필요한 순간을 찾아 영어로 대사 만들기","친구를 놀리지 않으려면 어떻게 말해야 하는지 세 문장으로 정리하기"]},{"id":"winn-dixie","title":"Because of Winn-Dixie","author":"Kate DiCamillo","isbn":"9780763607760","ar":3.9,"lex":"670L","il":"MG","pts":3.0,"pages":192,"pub":"Candlewick","year":2000,"j":5,"theme":"반려견·우정·가족","why":"개 한 마리 덕분에 마을 사람들과 친구가 되는 오퍼의 여름 이야기.","acts":["오퍼가 위니딕시 덕분에 만난 사람들을 영어로 정리하기","“Because of ___, I ___” 문장으로 내 삶을 바꾼 존재 소개하기"]},{"id":"holes","title":"Holes","author":"Louis Sachar","isbn":"9780440414803","ar":4.6,"lex":"660L","il":"MG","pts":7.0,"pages":288,"pub":"Yearling","year":1998,"j":6,"theme":"미스터리·정의·가족","why":"수용소에서 구덩이를 파는 소년 스탠리의 이야기. 과거와 현재가 맞물리는 구조가 흥미롭다.","acts":["구덩이를 파는 이유를 영어로 요약하기","“It was all because of ___” 문장으로 인과 관계 말하기"]},{"id":"bridge-terabithia","title":"Bridge to Terabithia","author":"Katherine Paterson","isbn":"9780881039214","ar":4.6,"lex":"810L","il":"MG","pts":5.0,"pages":128,"pub":"HarperCollins","year":1977,"j":6,"theme":"우정·상실·상상","why":"상상의 나라 테라비시아를 만든 두 아이의 우정과 이별 이야기.","acts":["테라비시아를 영어로 묘사하는 문장 세 개 만들기","친구를 잃은 마음을 “I will always remember ___”로 표현하기"]},{"id":"tuck-everlasting","title":"Tuck Everlasting","author":"Natalie Babbitt","isbn":"9780756980993","ar":5.0,"lex":"770L","il":"MG","pts":4.0,"pages":144,"pub":"Square Fish","year":1975,"j":6,"theme":"영생·선택·가족","why":"영원히 늙지 않는 가족 터크 가문과 위니의 선택을 다룬 이야기.","acts":["영생의 장점과 단점을 영어로 각각 두 가지 말하기","“If I could live forever, I would ___”로 내 생각 쓰기"]},{"id":"number-stars","title":"Number the Stars","author":"Lois Lowry","isbn":"9781432860844","ar":4.5,"lex":"670L","il":"MG","pts":4.0,"pages":160,"pub":"HMH","year":1989,"j":5,"theme":"용기·역사·우정","why":"나치 점령기 덴마크에서 유대인 친구를 구하는 안네마리의 이야기.","acts":["친구를 숨겨 준 사람들의 용기를 영어 문장으로 정리하기","“I would help my friend by ___”로 내가 할 수 있는 일 말하기"]},{"id":"giver","title":"The Giver","author":"Lois Lowry","isbn":"9780544336261","ar":5.7,"lex":"760L","il":"MG+","pts":7.0,"pages":240,"pub":"HMH","year":1993,"j":7,"theme":"선택·기억·사회","why":"감정과 기억이 사라진 사회에서 진실을 받아들이는 조너스의 이야기.","acts":["조너스의 사회 규칙을 영어로 세 가지 정리하기","“I think memories are important because ___”로 의견 쓰기"]},{"id":"wonder","title":"Wonder","author":"R.J. Palacio","isbn":"9780375969027","ar":4.8,"lex":"790L","il":"MG","pts":11.0,"pages":320,"pub":"Knopf","year":2012,"j":6,"theme":"친절·다름·학교","why":"얼굴이 다른 어기에게 찾아온 학교 첫해의 이야기. 여러 인물의 시선으로 전개된다.","acts":["“When given the choice between being right and being kind, choose kind” 문장 해석하기","친구에게 해 주고 싶은 친절한 말 세 가지 영어로 쓰기"]},{"id":"lightning-thief","title":"The Lightning Thief","author":"Rick Riordan","isbn":"9780786838653","ar":4.7,"lex":"680L","il":"MG","pts":13.0,"pages":416,"pub":"Hyperion","year":2005,"j":6,"theme":"신화·모험·정체성","why":"자신이 포세이돈의 아들임을 알게 된 퍼시의 모험. 그리스 신화와 영어 이름이 함께 나온다.","acts":["등장인물의 신 이름을 영어로 읽어 보기 (Zeus, Athena, Poseidon)","“I am the child of ___”처럼 나만의 신화 속 정체성 만들어 보기"]},{"id":"harry-potter1","title":"Harry Potter and the Sorcerer's Stone","author":"J.K. Rowling","isbn":"9780590353427","ar":5.5,"lex":"880L","il":"MG","pts":12.0,"pages":320,"pub":"Scholastic","year":1998,"j":6,"theme":"마법·우정·성장","why":"호그와트에 입학한 해리의 첫해 모험. 긴 문장을 읽기 시작하는 단계의 대표작.","acts":["마법 용어(wand, potion, spell) 열 개를 찾아 정리하기","“I would be sorted into ___ house because ___”로 나를 소개하기"]},{"id":"wimpy-kid","title":"Diary of a Wimpy Kid","author":"Jeff Kinney","isbn":"9781419741852","ar":5.2,"lex":"950L","il":"MG","pts":3.0,"pages":224,"pub":"Abrams","year":2007,"j":6,"theme":"학교·유머·일기","why":"중학생 그레그의 일기 형식으로 진행되는 이야기. 만화와 글이 섞여 읽기 부담이 적다.","acts":["영어 일기를 세 문장 써 보기 (Today I ___. I felt ___. Tomorrow I will ___.)","그레그의 계획이 실패한 이유를 영어로 한 문장 정리하기"]},{"id":"despereaux","title":"The Tale of Despereaux","author":"Kate DiCamillo","isbn":"9780763680893","ar":4.7,"lex":"670L","il":"MG","pts":5.0,"pages":272,"pub":"Candlewick","year":2003,"j":6,"theme":"용기·동화·구조","why":"작은 생쥐가 공주를 구하는 동화적 이야기. 네 인물의 시선이 교차한다.","acts":["등장인물 네 명을 영어로 소개하는 짧은 문장 만들기","“Light shines in the darkness” 같은 주제 문장 찾아 뜻 쓰기"]},{"id":"frindle","title":"Frindle","author":"Andrew Clements","isbn":"9780689818769","ar":5.4,"lex":"830L","il":"MG","pts":3.0,"pages":112,"pub":"Simon & Schuster","year":1996,"j":6,"theme":"말·창의·학교","why":"펜을 ‘frindle’이라 부르기 시작한 닉이 만든 말의 힘을 그린 이야기.","acts":["내가 새로 만들고 싶은 영어 단어와 이유 말하기","말에 따라 사람들이 달라진 경험을 “I call it ___”로 소개하기"]},{"id":"chocolate-touch","title":"The Chocolate Touch","author":"Patrick Skene Catling","isbn":"9780688161330","ar":4.7,"lex":"770L","il":"MG","pts":3.0,"pages":128,"pub":"HarperCollins","year":1952,"j":6,"theme":"욕심·판타지·교훈","why":"만지는 것이 모두 초콜릿이 되는 존의 이야기. 욕심의 결과를 유쾌하게 보여 준다.","acts":["초콜릿이 되면 안 되는 물건을 영어로 다섯 개 말하기","“I wish ___” 소원의 장단점을 영어로 정리하기"]},{"id":"sideways-wayside","title":"Sideways Stories from Wayside School","author":"Louis Sachar","isbn":"9780380698714","ar":3.3,"lex":"460L","il":"MG","pts":4.0,"pages":176,"pub":"HarperCollins","year":1978,"j":4,"theme":"학교·유머·단편","why":"지어진 순서가 뒤바뀐 30층 학교에서 벌어지는 엉뚱한 단편들. 짧아서 한 편씩 읽기 좋다.","acts":["재미있었던 인물 한 명을 영어로 소개하기","우리 반 이야기로 짧은 영어 단편 한 장면 쓰기"]},{"id":"phantom-tollbooth","title":"The Phantom Tollbooth","author":"Norton Juster","isbn":"9780394820378","ar":6.7,"lex":"1000L","il":"MG","pts":7.0,"pages":272,"pub":"Random House","year":1961,"j":7,"theme":"언어유희·철학·모험","why":"단어와 숫자의 나라를 지나는 밀로의 여행. 영어 말장난과 개념이 가득하다.","acts":["책에 나온 말장난 이름(the Doldrums, Jumping to Conclusions) 뜻 추측하기","내가 여행하고 싶은 '이야기 속 나라'를 영어로 소개하기"]},{"id":"lion-witch","title":"The Lion, the Witch and the Wardrobe","author":"C.S. Lewis","isbn":"9780064471046","ar":5.7,"lex":"940L","il":"MG","pts":6.0,"pages":208,"pub":"HarperCollins","year":1950,"j":7,"theme":"판타지·용기·선악","why":"옷장을 지나 나니아로 들어간 네 남매의 모험. 판타지 고전 시리즈의 시작.","acts":["나니아의 계절과 분위기를 영어 형용사로 묘사하기","아슬란과 대화한다면 하고 싶은 질문 세 개 만들기"]},{"id":"hatchet","title":"Hatchet","author":"Gary Paulsen","isbn":"9780756979119","ar":5.7,"lex":"1020L","il":"MG+","pts":7.0,"pages":208,"pub":"Simon & Schuster","year":1987,"j":7,"theme":"생존·자연·성장","why":"비행기 사고로 홀로 숲에 남은 브라이언의 생존 이야기.","acts":["브라이언이 생존을 위해 한 일을 영어로 순서대로 정리하기","“If I were alone in the wild, I would need ___” 문장 만들기"]},{"id":"blue-dolphins","title":"Island of the Blue Dolphins","author":"Scott O'Dell","isbn":"9780547328614","ar":5.4,"lex":"1000L","il":"MG","pts":6.0,"pages":192,"pub":"HMH","year":1960,"j":6,"theme":"생존·자연·외로움","why":"홀로 섬에 남은 소녀 카라나가 자연과 함께 살아가는 이야기.","acts":["카라나가 만든 도구와 생활 방법을 영어로 정리하기","혼자 지내야 한다면 필요한 것을 “I would need ___ first”로 말하기"]},{"id":"cricket-times-square","title":"The Cricket in Times Square","author":"George Selden","isbn":"9780312380038","ar":4.9,"lex":"780L","il":"MG","pts":4.0,"pages":144,"pub":"Macmillan","year":1960,"j":6,"theme":"우정·음악·도시","why":"시골에서 뉴욕 지하철역에 온 귀뚜라미 체스터의 이야기.","acts":["체스터가 낸 음악이 사람들에게 준 영향을 영어로 정리하기","“My favorite sound is ___ because ___” 문장 쓰기"]},{"id":"mouse-motorcycle","title":"The Mouse and the Motorcycle","author":"Beverly Cleary","isbn":"9780380709243","ar":5.1,"lex":"860L","il":"MG","pts":4.0,"pages":208,"pub":"HarperCollins","year":1965,"j":6,"theme":"모험·친구·장난감","why":"장난감 오토바이를 타는 생쥐 랠프와 소년 키스의 우정 이야기.","acts":["랠프가 오토바이를 타는 장면의 영어 의성어 찾기","“Vroom!”처럼 소리를 나타내는 영어 단어 다섯 개 익히기"]}];
+  var KEY = 'bookjaram.en.v1';
+  var DEFAULT_SETTINGS = { goal: 100, naruKey: '', libTpl: '', child: '' };
+
+  var store = loadStore();
+  function loadStore() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return { settings: Object.assign({}, DEFAULT_SETTINGS), records: {} };
+      var d = JSON.parse(raw);
+      d.settings = Object.assign({}, DEFAULT_SETTINGS, d.settings || {});
+      d.records = d.records || {};
+      return d;
+    } catch (e) {
+      return { settings: Object.assign({}, DEFAULT_SETTINGS), records: {} };
+    }
+  }
+  function saveStore() {
+    try { localStorage.setItem(KEY, JSON.stringify(store)); }
+    catch (e) { toast('저장 공간이 부족해 저장하지 못했어요'); }
+  }
+
+  /* =========================================================
+     1. 기준값 · 도우미
+     ========================================================= */
+  var AR_BANDS = [
+    { id: 'all', label: 'AR 전체' },
+    { id: 'a1', label: '0.5~1.9', test: function (v) { return v >= 0.5 && v < 2; } },
+    { id: 'a2', label: '2.0~2.9', test: function (v) { return v >= 2 && v < 3; } },
+    { id: 'a3', label: '3.0~3.9', test: function (v) { return v >= 3 && v < 4; } },
+    { id: 'a4', label: '4.0~4.9', test: function (v) { return v >= 4 && v < 5; } },
+    { id: 'a5', label: '5.0+', test: function (v) { return v >= 5; } }
+  ];
+  var LX_BANDS = [
+    { id: 'all', label: '렉사일 전체' },
+    { id: 'l1', label: 'BR~300L', test: function (v) { return v <= 300; } },
+    { id: 'l2', label: '310~500L', test: function (v) { return v > 300 && v <= 500; } },
+    { id: 'l3', label: '510~700L', test: function (v) { return v > 500 && v <= 700; } },
+    { id: 'l4', label: '710~900L+', test: function (v) { return v > 700; } }
+  ];
+  var J_INFO = {
+    1: { name: 'J1 리듬·기초 그림책', short: 'J1' },
+    2: { name: 'J2 쉬운 그림책·리더스', short: 'J2' },
+    3: { name: 'J3 그림책·리더스 심화', short: 'J3' },
+    4: { name: 'J4 얼리챕터북', short: 'J4' },
+    5: { name: 'J5 챕터북·로알드 달', short: 'J5' },
+    6: { name: 'J6 장편 소설', short: 'J6' },
+    7: { name: 'J7 장편·고난도', short: 'J7' }
+  };
+  var STAGE_ACTS = {
+    1: ['같은 문장을 소리 내어 세 번 따라 읽기', '그림 속 동물·색깔을 영어로 가리키며 말하기', '노래처럼 리듬 타며 책 읽기'],
+    2: ['반복 문장 하나를 골라 내 상황으로 바꿔 말하기', '주인공에게 "Hello!" 인사하며 역할극하기', '책에 나온 단어 5개로 낱말 카드 만들기'],
+    3: ['좋아하는 장면을 그리고 영어 한 문장 붙이기', '등장인물에게 묻고 싶은 질문 3개 만들기', '처음-중간-끝을 한 문장씩 영어로 말하기'],
+    4: ['챕터 하나를 골라 3문장으로 요약하기', '새로 배운 표현 5개로 짧은 문장 만들기', '주인공과 나를 비교해 "We both ___" 문장 3개'],
+    5: ['책 전체를 5문장으로 요약해 말하기', '가장 인상적인 문장을 옮겨 적고 이유 쓰기', '다른 결말을 상상해 3문장으로 쓰기'],
+    6: ['인물의 선택을 두고 찬반 의견 말하기', '모르는 단어를 문맥으로 추측해 뜻 적기', '한 챕터를 소리 내어 읽고 녹음해 듣기'],
+    7: ['책의 주제를 한 문장으로 정리하고 근거 찾기', '작가의 의도를 추측해 짧은 글 쓰기', '인물 인터뷰 형식으로 질문·답 만들기']
+  };
+  var BAND_COLOR = { a1: '#4f86b8', a2: '#4f8a5f', a3: '#b98a1f', a4: '#a85f36', a5: '#8a5b9e', none: '#8f8b7d' };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function normTitle(t) {
+    var s = String(t || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+    s = s.replace(/^(the|a|an) /, '');
+    return s;
+  }
+  function lexNum(lex) {
+    if (!lex) return 9999;
+    var m = String(lex).match(/-?\d+/);
+    if (!m) return 0;
+    var v = parseInt(m[0], 10);
+    if (/^BR/i.test(String(lex))) return -100 + v / 10; /* BR은 가장 쉬움 */
+    return v;
+  }
+  function lexLabel(lex) { return lex ? String(lex) : '—'; }
+  function arBandId(ar) {
+    if (!ar) return 'none';
+    if (ar < 2) return 'a1';
+    if (ar < 3) return 'a2';
+    if (ar < 4) return 'a3';
+    if (ar < 5) return 'a4';
+    return 'a5';
+  }
+  function bandColor(ar) { return BAND_COLOR[arBandId(ar)]; }
+  function fmtDate(d) {
+    if (typeof d === 'string') {
+      var m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m) return m[1] + '.' + m[2] + '.' + m[3];
+    }
+    var dt = d instanceof Date ? d : new Date(d);
+    if (isNaN(dt)) return '';
+    return dt.getFullYear() + '.' + pad(dt.getMonth() + 1) + '.' + pad(dt.getDate());
+  }
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function todayISO() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.classList.remove('show'); }, 1900);
+  }
+  function copyText(txt) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt);
+        return true;
+      }
+    } catch (e) { }
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  /* =========================================================
+     2. 상태
+     ========================================================= */
+  var view = {
+    tab: 'books',
+    mode: 'ar',          /* ar | lex */
+    dir: 1,              /* 1 낮은순, -1 높은순 */
+    band: 'all',
+    j: 'all',
+    q: '',
+    shelfView: 'log',
+    scanOn: false,
+    pending: null
+  };
+
+  /* =========================================================
+     3. 기록 모델
+     ========================================================= */
+  function recOf(id) { return store.records[id]; }
+  function ensureRec(b) {
+    var id = b.id;
+    if (!store.records[id]) {
+      store.records[id] = {
+        id: id, title: b.title, author: b.author || '', isbn: b.isbn || '',
+        ar: b.ar || 0, lex: b.lex || '', j: b.j || 0, theme: b.theme || '',
+        why: b.why || '', acts: b.acts || [], src: b.src || 'catalog',
+        cover: b.cover || '', emoji: b.emoji || '', logs: []
+      };
+      saveStore();
+    }
+    return store.records[id];
+  }
+  function allRecs() {
+    return Object.keys(store.records).map(function (k) { return store.records[k]; })
+      .sort(function (a, b) { return (lastAt(b) || 0) - (lastAt(a) || 0); });
+  }
+  function lastAt(r) { return r.logs && r.logs.length ? new Date(r.logs[r.logs.length - 1].date).getTime() : 0; }
+  function totalReads() {
+    var n = 0;
+    Object.keys(store.records).forEach(function (k) {
+      (store.records[k].logs || []).forEach(function (l) { n += 1 + (l.repeats || 0); });
+    });
+    return n;
+  }
+  function uniqueCount() {
+    return Object.keys(store.records).filter(function (k) { return (store.records[k].logs || []).length > 0; }).length;
+  }
+  function monthReads() {
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth();
+    var n = 0;
+    Object.keys(store.records).forEach(function (k) {
+      (store.records[k].logs || []).forEach(function (l) {
+        var d = new Date(l.date);
+        if (d.getFullYear() === y && d.getMonth() === m) n += 1 + (l.repeats || 0);
+      });
+    });
+    return n;
+  }
+  function bandDist() {
+    var out = { a1: 0, a2: 0, a3: 0, a4: 0, a5: 0, none: 0 };
+    Object.keys(store.records).forEach(function (k) {
+      var r = store.records[k];
+      if ((r.logs || []).length) out[arBandId(r.ar)]++;
+    });
+    return out;
+  }
+
+  /* =========================================================
+     4. 커버 · 링크
+     ========================================================= */
+  window.cvFallback = function (img) {
+    var isbn = img.getAttribute('data-isbn') || '';
+    var stage = img.getAttribute('data-stage') || '0';
+    if (stage === '0') {
+      img.setAttribute('data-stage', '1');
+      img.src = 'https://covers.renaissance.com/images/' + isbn + '/highres.jpg';
+      return;
+    }
+    img.style.display = 'none';
+    var p = img.parentNode;
+    if (p) { var e = p.getAttribute('data-emoji'); if (e) p.setAttribute('data-fallback', e); }
+  };
+  function coverHTML(b, small) {
+    var isbn = (b.isbn || '').replace(/[^0-9Xx]/g, '');
+    var emoji = b.emoji || '📕';
+    var g1 = b.ar ? bandColor(b.ar) : '#b9b3a3';
+    var html = '<div class="cover" data-emoji="' + emoji + '" style="--cs1:#f7fafd;--cs2:' + g1 + '33">';
+    html += '<span style="position:absolute;font-size:' + (small ? '18px' : '24px') + ';opacity:.9">' + emoji + '</span>';
+    if (isbn) {
+      html += '<img loading="lazy" alt="" data-isbn="' + isbn + '" src="https://covers.openlibrary.org/b/isbn/' + isbn + '-M.jpg" style="position:relative;z-index:1;background:#fffdf9" onerror="cvFallback(this)">';
+    }
+    html += '</div>';
+    return html;
+  }
+  function ytReadAloud(b) {
+    return 'https://www.youtube.com/results?search_query=' +
+      encodeURIComponent((b.title || '') + ' ' + (b.author || '').split('·')[0].trim() + ' read aloud');
+  }
+  function ytAudio(b) {
+    return 'https://www.youtube.com/results?search_query=' + encodeURIComponent((b.title || '') + ' audiobook');
+  }
+  function openLibLink(b) {
+    return 'https://openlibrary.org/search?q=' + encodeURIComponent((b.title || '') + ' ' + (b.author || ''));
+  }
+
+  /* =========================================================
+     5. 추천도서 탭
+     ========================================================= */
+  function visibleBooks() {
+    var q = view.q.trim().toLowerCase();
+    var band = view.band;
+    var books = BOOKS.filter(function (b) {
+      if (q) {
+        var hay = (b.title + ' ' + b.author + ' ' + b.isbn + ' ' + (b.theme || '')).toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      if (view.j !== 'all' && b.j !== parseInt(view.j, 10)) return false;
+      if (band !== 'all') {
+        var bands = view.mode === 'ar' ? AR_BANDS : LX_BANDS;
+        var def = bands.filter(function (x) { return x.id === band; })[0];
+        if (def && def.test) {
+          var v = view.mode === 'ar' ? b.ar : lexNum(b.lex);
+          if (!def.test(v)) return false;
+        }
+      }
+      return true;
+    });
+    books.sort(function (x, y) {
+      var a = view.mode === 'ar' ? x.ar : lexNum(x.lex);
+      var bv = view.mode === 'ar' ? y.ar : lexNum(y.lex);
+      if (a === bv) return x.title.localeCompare(y.title);
+      return (a - bv) * view.dir;
+    });
+    return books;
+  }
+
+  function renderBooks() {
+    var books = visibleBooks();
+    var bands = view.mode === 'ar' ? AR_BANDS : LX_BANDS;
+    var h = '';
+    h += '<div class="pad">';
+    h += '<h1 class="h1">영어원서 ' + BOOKS.length + '권</h1>';
+    h += '<p class="sub">나이 순서가 아니라 <b>AR 지수·렉사일 지수</b>가 낮은 책부터 차례로 담았어요. 잠수네 영어 단계(J1~J7)를 참고 배지로 함께 표시합니다.</p>';
+    h += '<div class="searchbox"><span class="ico">🔍</span><input id="q" type="search" placeholder="제목·저자·ISBN 검색" value="' + esc(view.q) + '"></div>';
+    h += '<div class="seg" id="modeSeg">' +
+      '<button data-mode="ar" class="' + (view.mode === 'ar' ? 'on' : '') + '">AR 지수순</button>' +
+      '<button data-mode="lex" class="' + (view.mode === 'lex' ? 'on' : '') + '">렉사일순</button></div>';
+    h += '<div class="chips" id="dirChips">' +
+      '<button class="chip ' + (view.dir === 1 ? 'is-on' : '') + '" data-dir="1">낮은순 ↑</button>' +
+      '<button class="chip ' + (view.dir === -1 ? 'is-on' : '') + '" data-dir="-1">높은순 ↓</button>' +
+      '<button class="chip" data-jump="shelf">내 책장 →</button></div>';
+    h += '<div class="chips" id="bandChips">';
+    bands.forEach(function (b) {
+      h += '<button class="chip ' + (view.band === b.id ? 'is-on' : '') + '" data-band="' + b.id + '">' + b.label + '</button>';
+    });
+    h += '</div>';
+    h += '<div class="chips" id="jChips"><button class="chip ' + (view.j === 'all' ? 'is-on' : '') + '" data-j="all">잠수네 전체</button>';
+    for (var j = 1; j <= 7; j++) {
+      h += '<button class="chip ' + (view.j === String(j) ? 'is-on' : '') + '" data-j="' + j + '">J' + j + '</button>';
+    }
+    h += '</div>';
+    h += '<div class="list-head"><span><b>' + books.length + '</b>권 표시 중</span><span>' +
+      (view.mode === 'ar' ? 'AR ' : 'Lexile ') + (view.dir === 1 ? '낮은순' : '높은순') + '</span></div>';
+
+    if (!books.length) {
+      h += '<div class="empty">조건에 맞는 책이 없어요.<br>필터를 <b>전체</b>로 바꿔 보세요.</div>';
+    }
+    books.forEach(function (b) {
+      var rec = recOf(b.id);
+      var read = rec && rec.logs && rec.logs.length;
+      h += '<article class="book" data-id="' + b.id + '">';
+      h += coverHTML(b);
+      h += '<div class="book-main">';
+      h += '<p class="book-title">' + esc(b.title) + '</p>';
+      h += '<p class="book-meta">' + esc(b.author) + '</p>';
+      h += '<div class="badges"><span class="bd bd-ar">AR ' + b.ar.toFixed(1) + '</span>' +
+        '<span class="bd bd-lex">' + lexLabel(b.lex) + '</span>' +
+        '<span class="bd bd-j">J' + b.j + '</span>' +
+        (read ? '<span class="bd bd-on">읽음 ' + rec.logs.length + '회</span>' : '') + '</div>';
+      h += '<p class="book-why">' + esc(b.why) + '</p>';
+      h += '<div class="book-actions">' +
+        '<button class="btn sm" data-act="detail" data-id="' + b.id + '">상세</button>' +
+        '<button class="btn sm primary" data-act="record" data-id="' + b.id + '">독서기록</button>' +
+        '<a class="btn sm" href="' + ytReadAloud(b) + '" target="_blank" rel="noopener">▶ Read Aloud</a>' +
+        '</div>';
+      h += '</div></article>';
+    });
+    h += '</div>';
+    var el = document.getElementById('tab-books');
+    el.innerHTML = h;
+    var q = el.querySelector('#q');
+    q.addEventListener('input', function (e) {
+      view.q = e.target.value;
+      clearTimeout(q._t);
+      q._t = setTimeout(function () { renderBooks(); var n = document.getElementById('q'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 220);
+    });
+  }
+
+  /* =========================================================
+     6. 도서관 탭
+     ========================================================= */
+  var YANGSAN = {
+    child: {
+      name: '양산시립어린이영어도서관',
+      addr: '경상남도 양산시 동면 강변로 30',
+      tel: '055-392-5850',
+      hours: '평일·토요일 09:00~18:00',
+      closed: '월요일·법정공휴일 휴관',
+      site: 'https://lib.yangsan.go.kr'
+    },
+    eng: {
+      name: '양산시립영어도서관',
+      addr: '경상남도 양산시 대평들1길 9-10 (소주동)',
+      tel: '055-392-5940',
+      note: '영어 원서·DVD 장서 중심'
+    },
+    central: {
+      name: '양산시립중앙도서관',
+      addr: '경상남도 양산시 물금읍 청룡로 11',
+      tel: '055-392-5900'
+    }
+  };
+
+  function renderLibrary(preset) {
+    var q = preset || '';
+    var h = '';
+    h += '<div class="pad">';
+    h += '<h1 class="h1">도서관에서 빌려 읽기</h1>';
+    h += '<p class="sub">양산시립어린이영어도서관을 기본으로, 영어원서 소장 여부를 확인해요.</p>';
+
+    h += '<div class="lib-card main">';
+    h += '<p class="lib-name">🏛 ' + YANGSAN.child.name + '</p>';
+    h += '<p class="lib-note">영어원서 전문 어린이도서관 · 기본 검색 대상</p>';
+    h += '<div class="lib-row"><span class="k">주소</span><span>' + YANGSAN.child.addr + '</span></div>';
+    h += '<div class="lib-row"><span class="k">전화</span><span><a href="tel:0553925850" style="color:var(--brand);text-decoration:none;font-weight:700">' + YANGSAN.child.tel + '</a></span></div>';
+    h += '<div class="lib-row"><span class="k">운영</span><span>' + YANGSAN.child.hours + '</span></div>';
+    h += '<div class="lib-row"><span class="k">휴관</span><span>' + YANGSAN.child.closed + '</span></div>';
+    h += '<div class="linkrow">' +
+      '<a class="btn sm primary" href="' + YANGSAN.child.site + '" target="_blank" rel="noopener">도서관 홈페이지 열기</a>' +
+      '<button class="btn sm" data-act="copyq">제목 복사</button>' +
+      '</div>';
+    h += '<p class="note">홈페이지의 <b>자료검색</b> 칸에 복사한 제목(또는 ISBN)을 붙여넣으면 소장 여부와 대출 상태를 볼 수 있어요. 도서관 검색 주소를 아신다면 ⚙️ 설정에서 한 번만 넣어 두면 아래 버튼이 바로 검색 화면으로 열립니다.</p>';
+    h += '</div>';
+
+    h += '<div class="searchbox" style="margin-top:14px"><span class="ico">🔍</span>' +
+      '<input id="libQ" type="search" placeholder="책 제목 또는 ISBN" value="' + esc(q) + '"></div>';
+    h += '<div class="linkrow" style="margin-top:0">' +
+      '<button class="btn primary" data-act="libSearch">도서관에서 찾기</button>' +
+      '<a class="btn" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(YANGSAN.child.name) + '" target="_blank" rel="noopener">지도에서 보기</a>' +
+      '</div>';
+
+    h += '<div class="section-title">정보나루 소장 조회 <span class="aside">인증키 필요</span></div>';
+    h += '<div class="lib-card">';
+    if (store.settings.naruKey) {
+      h += '<p class="lib-kv" style="font-size:13px;margin:0 0 8px">인증키가 저장되어 있어요. ISBN으로 양산 지역 도서관 소장 여부를 확인합니다.</p>';
+      h += '<div class="searchbox"><span class="ico">#</span><input id="naruIsbn" type="search" placeholder="ISBN-13 (예: 9780064400558)"></div>';
+      h += '<button class="btn wide primary" data-act="naruCheck">양산 도서관 소장 조회</button>';
+      h += '<div id="naruOut" style="margin-top:10px"></div>';
+    } else {
+      h += '<p class="kv" style="margin:0 0 10px">도서관 정보나루(data4library.kr) 무료 인증키를 넣으면, ISBN으로 <b>양산시립도서관 소장 여부</b>를 앱 안에서 바로 확인할 수 있어요.</p>';
+      h += '<button class="btn wide" data-act="openSettings">⚙️ 설정에서 인증키 넣기</button>';
+    }
+    h += '</div>';
+
+    h += '<div class="section-title">양산의 다른 도서관</div>';
+    [YANGSAN.eng, YANGSAN.central].forEach(function (l) {
+      h += '<div class="lib-card">';
+      h += '<p class="lib-name" style="font-size:14.5px">' + l.name + '</p>';
+      h += '<div class="lib-row"><span class="k">주소</span><span>' + l.addr + '</span></div>';
+      h += '<div class="lib-row"><span class="k">전화</span><span><a href="tel:' + l.tel.replace(/-/g, '') + '" style="color:var(--brand);text-decoration:none;font-weight:700">' + l.tel + '</a></span></div>';
+      if (l.note) h += '<div class="lib-row"><span class="k">특징</span><span>' + l.note + '</span></div>';
+      h += '</div>';
+    });
+    h += '<p class="note">도서관 정보는 전국도서관표준데이터 기준입니다. 운영 시간은 바뀔 수 있으니 방문 전에 전화로 확인하세요.</p>';
+    h += '</div>';
+
+    var el = document.getElementById('tab-library');
+    el.innerHTML = h;
+  }
+
+  function libQuery() {
+    var i = document.getElementById('libQ');
+    return i ? i.value.trim() : '';
+  }
+  function openLibSearch(kind) {
+    var q = libQuery();
+    if (!q) { toast('책 제목이나 ISBN을 먼저 넣어 주세요'); var el = document.getElementById('libQ'); if (el) el.focus(); return; }
+    var tpl = (store.settings.libTpl || '').trim();
+    var copied = copyText(q);
+    if (tpl) {
+      var url = tpl.indexOf('{q}') >= 0 ? tpl.replace('{q}', encodeURIComponent(q)) : tpl + encodeURIComponent(q);
+      window.open(url, '_blank', 'noopener');
+      toast('검색 화면을 열었어요');
+      return;
+    }
+    window.open(YANGSAN.child.site, '_blank', 'noopener');
+    toast(copied ? '제목을 복사했어요 — 도서관 자료검색에 붙여넣기' : '도서관 홈페이지를 열었어요');
+  }
+
+  /* =========================================================
+     7. 바코드 탭
+     ========================================================= */
+  function renderScan() {
+    var h = '';
+    h += '<div class="pad">';
+    h += '<h1 class="h1">바코드로 담기</h1>';
+    h += '<p class="sub">영어원서 뒤표지의 ISBN 바코드를 찍으면 제목·저자·표지가 자동으로 채워져요.</p>';
+    h += '<div id="reader"></div>';
+    h += '<div class="linkrow" style="margin-top:0">' +
+      '<button class="btn primary" id="scanStart" data-act="scanStart">📷 카메라로 스캔</button>' +
+      '<button class="btn" id="scanStop" data-act="scanStop" disabled>중지</button></div>';
+    h += '<div class="field" style="margin-top:14px"><label>ISBN 직접 입력</label>' +
+      '<input id="isbnIn" inputmode="numeric" placeholder="9780064400558">' +
+      '<div class="linkrow" style="margin-top:8px"><button class="btn primary" data-act="isbnLookup">책 정보 불러오기</button>' +
+      '<button class="btn" data-act="manual">직접 입력해서 담기</button></div></div>';
+    h += '<div id="scanOut"></div>';
+    h += '<p class="note">ISBN 조회는 Open Library를 먼저, 안 되면 Google Books를 씁니다. AR·렉사일 지수가 자동으로 채워지지 않는 책은 직접 넣거나, 추천도서에서 같은 책을 찾아 기록할 수 있어요.</p>';
+    h += '</div>';
+    var el = document.getElementById('tab-scan');
+    el.innerHTML = h;
+    if (view.scanOn) startScan();
+  }
+
+  function onScanSuccess(decoded) {
+    var code = String(decoded || '').replace(/[^0-9Xx]/g, '');
+    if (code.length < 10) return;
+    stopScan();
+    var inp = document.getElementById('isbnIn');
+    if (inp) inp.value = code;
+    lookupISBN(code);
+  }
+  function startScan() {
+    if (typeof Html5Qrcode === 'undefined') { toast('스캔 모듈을 불러오지 못했어요. ISBN을 직접 넣어 주세요'); return; }
+    var box = document.getElementById('reader');
+    if (!box) return;
+    try {
+      var fmts = [];
+      if (window.Html5QrcodeSupportedFormats) {
+        fmts = [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.CODE_128];
+      }
+      view.qr = fmts.length ? new Html5Qrcode('reader', { formatsToSupport: fmts, verbose: false }) : new Html5Qrcode('reader');
+      view.scanOn = true;
+      view.qr.start({ facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 260, height: 150 } },
+        onScanSuccess,
+        function () { })
+        .then(function () {
+          var s = document.getElementById('scanStart'), t = document.getElementById('scanStop');
+          if (s) s.disabled = true; if (t) t.disabled = false;
+          toast('바코드를 비추면 자동으로 인식돼요');
+        })
+        .catch(function () {
+          view.scanOn = false;
+          toast('카메라를 열 수 없어요. ISBN을 직접 넣어 주세요');
+        });
+    } catch (e) {
+      view.scanOn = false;
+      toast('카메라를 열 수 없어요');
+    }
+  }
+  function stopScan() {
+    view.scanOn = false;
+    var s = document.getElementById('scanStart'), t = document.getElementById('scanStop');
+    if (s) s.disabled = false; if (t) t.disabled = true;
+    if (view.qr) {
+      try { view.qr.stop().then(function () { try { view.qr.clear(); } catch (e) { } }); } catch (e) { }
+      view.qr = null;
+    }
+  }
+
+  async function lookupISBN(isbn) {
+    var out = document.getElementById('scanOut');
+    if (!out) return;
+    out.innerHTML = '<div class="empty">책 정보를 찾는 중…</div>';
+    var known = BOOKS.filter(function (b) { return b.isbn === isbn; })[0];
+    var found = null;
+    try {
+      var r = await fetch('https://openlibrary.org/api/books?bibkeys=ISBN%3A' + isbn + '&format=json&jscmd=data', { cache: 'no-store' });
+      var j = await r.json();
+      var k = 'ISBN:' + isbn;
+      if (j[k]) {
+        var d = j[k];
+        found = {
+          title: d.title,
+          author: (d.authors || []).map(function (a) { return a.name; }).join(', '),
+          pages: d.number_of_pages || '',
+          year: (d.publish_date || ''),
+          pub: ((d.publishers || [])[0] || {}).name || ''
+        };
+      }
+    } catch (e) { }
+    if (!found) {
+      try {
+        var r2 = await fetch('https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn);
+        var j2 = await r2.json();
+        if (j2.items && j2.items[0]) {
+          var vi = j2.items[0].volumeInfo;
+          found = { title: vi.title, author: (vi.authors || []).join(', '), pages: vi.pageCount || '', year: vi.publishedDate || '', pub: vi.publisher || '' };
+        }
+      } catch (e) { }
+    }
+    if (!found && known) {
+      found = { title: known.title, author: known.author, pages: known.pages, year: known.year, pub: known.pub };
+    }
+    if (!known && found && found.title) {
+      var nt = normTitle(found.title);
+      known = BOOKS.filter(function (b) { return normTitle(b.title) === nt; })[0];
+    }
+    if (!found) {
+      out.innerHTML = '<div class="empty">이 ISBN을 찾지 못했어요.<br>제목과 저자를 직접 넣어 등록해 주세요.</div>' +
+        '<button class="btn wide" data-act="manual" data-isbn="' + isbn + '">직접 입력해서 담기</button>';
+      return;
+    }
+    var b = known ? Object.assign({}, known) : {
+      id: 'c' + isbn, title: found.title, author: found.author, isbn: isbn,
+      ar: 0, lex: '', j: 0, theme: '', why: '', acts: [], src: 'custom', emoji: '📘'
+    };
+    b.title = known ? known.title : found.title;
+    b.author = known ? known.author : (found.author || b.author);
+    b.isbn = isbn;
+    if (known) found = Object.assign({}, found, { title: known.title, author: known.author });
+    view.pending = b;
+    var cover = 'https://covers.openlibrary.org/b/isbn/' + isbn + '-L.jpg';
+    out.innerHTML = '<div class="lib-card" style="margin-top:14px">' +
+      '<div style="display:flex;gap:12px">' +
+      '<div class="cover" style="width:70px;height:98px" data-emoji="📘"><img alt="" data-isbn="' + isbn + '" src="' + cover + '" onerror="cvFallback(this)"></div>' +
+      '<div style="min-width:0;flex:1"><p class="lib-name" style="font-size:15px">' + esc(found.title) + '</p>' +
+      '<p class="lib-meta" style="font-size:12.5px;color:var(--muted);margin:0 0 6px">' + esc(found.author || '') + '</p>' +
+      '<p class="kv">ISBN ' + isbn + (found.pages ? ' · ' + found.pages + 'p' : '') + (found.pub ? ' · ' + esc(found.pub) : '') + '</p>' +
+      (known ? '<div class="badges" style="margin-top:6px"><span class="bd bd-ar">AR ' + known.ar.toFixed(1) + '</span><span class="bd bd-lex">' + known.lex + '</span><span class="bd bd-j">J' + known.j + '</span></div>'
+        : '<p class="note" style="margin-top:6px">추천도서 목록에 없는 책이라 AR·렉사일은 직접 넣어 주세요.</p>') +
+      '</div></div>' +
+      '<div class="linkrow"><button class="btn primary" data-act="addPending">내 책장에 담기</button>' +
+      '<button class="btn" data-act="recordPending">바로 독서기록</button></div>' +
+      '<div class="linkrow"><a class="btn sm" href="' + ytReadAloud(b) + '" target="_blank" rel="noopener">▶ Read Aloud 찾기</a>' +
+      '<a class="btn sm" href="' + ytAudio(b) + '" target="_blank" rel="noopener">🎧 오디오북 찾기</a></div>' +
+      '</div>';
+  }
+
+  /* =========================================================
+     8. 내 책장 · 북트리
+     ========================================================= */
+  function renderShelf() {
+    var recs = allRecs();
+    var h = '<div class="pad">';
+    h += '<h1 class="h1">내 책장</h1>';
+    h += '<div class="seg" id="shelfSeg">' +
+      '<button data-sv="log" class="' + (view.shelfView === 'log' ? 'on' : '') + '">독서기록</button>' +
+      '<button data-sv="tree" class="' + (view.shelfView === 'tree' ? 'on' : '') + '">🌳 북트리</button></div>';
+    if (view.shelfView === 'tree') {
+      h += treeHTML();
+    } else {
+      h += '<div class="stat-grid">' +
+        '<div class="stat"><b>' + totalReads() + '</b><span>총 읽은 권수</span></div>' +
+        '<div class="stat"><b>' + monthReads() + '</b><span>이번 달</span></div>' +
+        '<div class="stat"><b>' + uniqueCount() + '</b><span>읽은 책 종류</span></div></div>';
+      if (!recs.length) {
+        h += '<div class="empty">아직 담은 책이 없어요.<br><b>추천도서</b>에서 마음에 드는 책을 골라 <b>독서기록</b>을 눌러 보세요.</div>';
+      }
+      recs.forEach(function (r) {
+        var logs = r.logs || [];
+        var last = logs[logs.length - 1];
+        var flags = [];
+        if (last) {
+          if (last.flow) flags.push('흘려듣기');
+          if (last.focus) flags.push('집중듣기');
+          if (last.aloud) flags.push('소리내어');
+          if (last.alone) flags.push('혼자읽기');
+          if (last.repeats) flags.push('+' + last.repeats + '회독');
+        }
+        h += '<div class="rec" data-act="openRec" data-id="' + r.id + '">';
+        h += coverHTML(r, true);
+        h += '<div style="min-width:0;flex:1">';
+        h += '<p class="rec-title">' + esc(r.title) + '</p>';
+        h += '<p class="rec-meta">' + (r.ar ? 'AR ' + Number(r.ar).toFixed(1) : 'AR —') + ' · ' + (r.lex || 'Lexile —') +
+          (r.j ? ' · J' + r.j : '') + '</p>';
+        h += '<p class="rec-meta">' + (logs.length ? '기록 ' + logs.length + '회 · ' + fmtDate(last.date) : '아직 기록 없음') + '</p>';
+        if (flags.length) h += '<p class="rec-flags">' + flags.join(' · ') + '</p>';
+        h += '</div></div>';
+      });
+      h += '<button class="btn wide" data-act="openSettings" style="margin-top:6px">⚙️ 설정 · 목표 권수 바꾸기</button>';
+    }
+    h += '</div>';
+    var el = document.getElementById('tab-shelf');
+    el.innerHTML = h;
+  }
+
+
+  /* ---------- 북트리 ---------- */
+  var TREE_ANCHORS = [
+    [180, 96], [148, 104], [212, 102], [124, 122], [236, 120], [166, 82], [198, 84],
+    [104, 146], [256, 144], [140, 78], [222, 76], [180, 68], [96, 176], [264, 172],
+    [116, 196], [244, 194], [152, 132], [208, 130], [132, 168], [228, 166],
+    [166, 118], [194, 116], [86, 138], [274, 136]
+  ];
+  function treeHTML() {
+    var recs = allRecs().filter(function (r) { return (r.logs || []).length > 0; });
+    var ghosts = allRecs().filter(function (r) { return !(r.logs || []).length; });
+    var leaves = recs.concat(ghosts).slice(0, 60);
+    var goal = store.settings.goal || 100;
+    var total = totalReads();
+    var pct = Math.max(0, Math.min(100, Math.round(total / goal * 1000) / 10));
+
+    var W = 360, H = 320;
+    var svg = '<svg class="tree-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="북트리">';
+    svg += '<defs>' +
+      '<radialGradient id="cg1" cx="50%" cy="45%" r="62%"><stop offset="0%" stop-color="#eef6e4"/><stop offset="100%" stop-color="#dfeed2"/></radialGradient>' +
+      '<radialGradient id="cg2" cx="50%" cy="50%" r="60%"><stop offset="0%" stop-color="#e6f1d9" stop-opacity=".9"/><stop offset="100%" stop-color="#e6f1d9" stop-opacity="0"/></radialGradient>' +
+      '</defs>';
+    /* 캐노피 */
+    svg += '<ellipse cx="180" cy="126" rx="126" ry="82" fill="url(#cg1)"/>';
+    svg += '<ellipse cx="118" cy="158" rx="66" ry="52" fill="url(#cg2)"/>';
+    svg += '<ellipse cx="246" cy="152" rx="70" ry="54" fill="url(#cg2)"/>';
+    svg += '<ellipse cx="180" cy="86" rx="74" ry="48" fill="url(#cg2)"/>';
+    /* 캐노피 결 (은은한 잎 질감) */
+    var seedPts = [[168,72],[132,96],[208,88],[96,150],[256,140],[120,124],[240,116],[180,58],[150,150],[212,146],[110,178],[250,172],[134,70],[226,64],[86,132],[274,126],[160,104],[200,108],[178,132],[146,128],[214,76],[102,110],[258,106],[160,182],[200,180],[122,142],[238,144],[180,96],[152,96],[212,112]];
+    seedPts.forEach(function (p, i) {
+      var sz2 = 0.55 + ((i * 7) % 5) * 0.06, h2 = 20 * sz2, s2 = 6.2 * sz2;
+      svg += '<path transform="translate(' + p[0] + ',' + p[1] + ') rotate(' + ((i * 61) % 120 - 60) + ')" d="M0,0 C' + s2.toFixed(1) + ',-' + (h2 * 0.34).toFixed(1) + ' ' + s2.toFixed(1) + ',-' + (h2 * 0.74).toFixed(1) + ' 0,-' + h2.toFixed(1) +
+        ' C-' + s2.toFixed(1) + ',-' + (h2 * 0.74).toFixed(1) + ' -' + s2.toFixed(1) + ',-' + (h2 * 0.34).toFixed(1) + ' 0,0Z" fill="#cfe3c0" opacity=".55"/>';
+    });
+    /* 땅 */
+    svg += '<ellipse cx="180" cy="300" rx="108" ry="13" fill="#e2dbc4"/>';
+    svg += '<ellipse cx="180" cy="297" rx="88" ry="9" fill="#efe9d7"/>';
+    /* 가지 */
+    var BR = [
+      ['M180 226 C176 200, 178 186, 180 172', 13],
+      ['M180 172 C170 150, 150 132, 138 112', 8],
+      ['M180 172 C192 148, 212 130, 224 110', 8],
+      ['M172 206 C150 190, 126 176, 110 156', 6],
+      ['M190 206 C214 190, 238 176, 252 154', 6],
+      ['M138 112 C130 100, 124 94, 118 84', 3.4],
+      ['M138 118 C144 110, 148 102, 150 94', 3],
+      ['M224 110 C232 100, 236 94, 242 84', 3.4],
+      ['M222 118 C216 110, 212 104, 210 94', 3],
+      ['M180 172 C180 150, 180 130, 180 108', 5],
+      ['M110 156 C104 148, 100 142, 96 134', 2.8],
+      ['M252 154 C258 146, 262 140, 266 132', 2.8]
+    ];
+    BR.forEach(function (bd) {
+      svg += '<path d="' + bd[0] + '" stroke="#a9885f" stroke-width="' + bd[1] + '" fill="none" stroke-linecap="round"/>';
+    });
+    svg += '<path d="M166 300 C162 266, 168 244, 172 226 L188 226 C192 244, 198 266, 194 300 Z" fill="#a9885f"/>';
+    svg += '<path d="M170 296 C168 268, 172 246, 176 228" stroke="#8e6f4c" stroke-width="2" fill="none" opacity=".45"/>';
+
+    if (!leaves.length) {
+      [[130, 150], [214, 132], [176, 190]].forEach(function (p) {
+        svg += '<path d="M' + p[0] + ',' + p[1] + ' C' + (p[0] + 7) + ',' + (p[1] - 8) + ' ' + (p[0] + 7) + ',' + (p[1] - 19) + ' ' + p[0] + ',' + (p[1] - 26) +
+          ' C' + (p[0] - 7) + ',' + (p[1] - 19) + ' ' + (p[0] - 7) + ',' + (p[1] - 8) + ' ' + p[0] + ',' + p[1] + 'Z" fill="none" stroke="#c3bda9" stroke-width="1.6" stroke-dasharray="3 3"/>';
+      });
+      svg += '<text x="180" y="228" text-anchor="middle" font-size="12.5" fill="#8a8577">첫 책을 읽으면 잎이 돋아나요</text>';
+    }
+
+    var N = leaves.length;
+    leaves.forEach(function (r, i) {
+      var a = TREE_ANCHORS[i % TREE_ANCHORS.length];
+      var ring = Math.floor(i / TREE_ANCHORS.length);
+      var ang = (i * 137.5) * Math.PI / 180;
+      var off = 6 + ring * 7;
+      var x = a[0] + Math.cos(ang) * off;
+      var y = a[1] + Math.sin(ang) * off * 0.8;
+      var read = (r.logs || []).length > 0;
+      var col = read ? bandColor(r.ar) : '#cfc9b8';
+      var sz = (read ? 1.3 + Math.min(0.4, (r.logs.length - 1) * 0.12) : 0.95) * (N > 24 ? 0.8 : 1);
+      var rot = ((i * 53) % 70) - 35 + (a[0] < 180 ? 12 : -12);
+      var hgt = 20 * sz, sx = 6.2 * sz;
+      svg += '<g data-leaf="' + r.id + '" transform="translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') rotate(' + rot + ')" style="cursor:pointer">' +
+        '<path d="M0,0 C' + sx.toFixed(1) + ',-' + (hgt * 0.34).toFixed(1) + ' ' + sx.toFixed(1) + ',-' + (hgt * 0.74).toFixed(1) + ' 0,-' + hgt.toFixed(1) +
+        ' C-' + sx.toFixed(1) + ',-' + (hgt * 0.74).toFixed(1) + ' -' + sx.toFixed(1) + ',-' + (hgt * 0.34).toFixed(1) + ' 0,0Z" fill="' + col + '" opacity="' + (read ? 0.95 : 0.45) + '"/>' +
+        '<path d="M0,-2 L0,-' + (hgt - 3).toFixed(1) + '" stroke="rgba(255,255,255,.5)" stroke-width=".9"/>' +
+        '<circle r="12" fill="transparent"/></g>';
+    });
+
+    var fruitN = Math.min(Math.floor(total / 10), 12);
+    for (var f = 0; f < fruitN; f++) {
+      var fa = TREE_ANCHORS[(f * 5 + 3) % TREE_ANCHORS.length];
+      var fx = fa[0] + (f % 2 ? 9 : -9), fy = fa[1] + 9;
+      svg += '<g><circle cx="' + fx + '" cy="' + fy + '" r="6.6" fill="#e0913d"/>' +
+        '<circle cx="' + (fx - 1.9) + '" cy="' + (fy - 2.1) + '" r="2.1" fill="#f8d0a4"/></g>';
+    }
+    svg += '</svg>';
+
+    var h = '<div class="goalbar"><div class="row"><span>목표 <b>' + goal.toLocaleString() + '권</b>까지</span><span><b>' + total + '</b>권 (' + pct + '%)</span></div>' +
+      '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="chips" style="margin-top:9px" id="goalChips">' +
+      [100, 300, 500, 1000].map(function (g) {
+        return '<button class="chip ' + (goal === g ? 'is-on' : '') + '" data-goal="' + g + '">' + g.toLocaleString() + '권</button>';
+      }).join('') + '</div></div>';
+    h += '<div class="tree-wrap">' + svg + '</div>';
+    h += '<div class="stat-grid">' +
+      '<div class="stat"><b>' + total + '</b><span>누적 읽은 권수</span></div>' +
+      '<div class="stat"><b>' + uniqueCount() + '</b><span>고유 권수</span></div>' +
+      '<div class="stat"><b>' + Math.floor(total / 10) + '</b><span>열린 열매</span></div></div>';
+    h += '<div class="legend">' +
+      '<span><i class="dot" style="background:#4f86b8"></i>AR 0.5~1.9</span>' +
+      '<span><i class="dot" style="background:#4f8a5f"></i>2.0~2.9</span>' +
+      '<span><i class="dot" style="background:#b98a1f"></i>3.0~3.9</span>' +
+      '<span><i class="dot" style="background:#a85f36"></i>4.0~4.9</span>' +
+      '<span><i class="dot" style="background:#8a5b9e"></i>5.0+</span>' +
+      '<span><i class="dot" style="background:#e0913d"></i>열매=10권</span></div>';
+    h += '<p class="note">잎 하나가 읽은 책 한 권이에요. 잎을 누르면 그 책의 기록이 열립니다. 반복해서 읽은 횟수는 <b>누적 권수</b>에 함께 쌓여요.</p>';
+    h += '<div class="section-title">지수별 분포</div>' + distHTML();
+    return h;
+  }
+  function distHTML() {
+    var d = bandDist();
+    var rows = [
+      ['a1', '0.5~1.9', d.a1], ['a2', '2.0~2.9', d.a2], ['a3', '3.0~3.9', d.a3],
+      ['a4', '4.0~4.9', d.a4], ['a5', '5.0+', d.a5], ['none', '지수 없음', d.none]
+    ];
+    var max = Math.max(1, d.a1, d.a2, d.a3, d.a4, d.a5, d.none);
+    return '<div>' + rows.map(function (r) {
+      return '<div style="display:flex;align-items:center;gap:8px;margin:6px 0;font-size:12px;color:var(--muted)">' +
+        '<span style="width:58px">' + r[1] + '</span>' +
+        '<span style="flex:1;height:8px;background:#e8e2d3;border-radius:99px;overflow:hidden"><i style="display:block;height:100%;width:' + (r[2] / max * 100) + '%;background:' + BAND_COLOR[r[0]] + '"></i></span>' +
+        '<b style="width:22px;text-align:right;color:#4c483e">' + r[2] + '</b></div>';
+    }).join('') + '</div>';
+  }
+
+  /* =========================================================
+     9. 시트(모달)
+     ========================================================= */
+  var sheet = document.getElementById('sheet');
+  var backdrop = document.getElementById('backdrop');
+  function openSheet(html) {
+    sheet.innerHTML = '<div class="sheet-grab"></div><div class="sheet-in">' + html + '</div>';
+    sheet.hidden = false;
+    backdrop.hidden = false;
+    requestAnimationFrame(function () {
+      sheet.classList.add('show'); backdrop.classList.add('show');
+    });
+    sheet.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSheet() {
+    sheet.classList.remove('show'); backdrop.classList.remove('show');
+    setTimeout(function () { sheet.hidden = true; backdrop.hidden = true; sheet.innerHTML = ''; }, 230);
+    document.body.style.overflow = '';
+  }
+  backdrop.addEventListener('click', closeSheet);
+
+  /* ---------- 상세 ---------- */
+  function openDetail(id) {
+    var b = BOOKS.filter(function (x) { return x.id === id; })[0];
+    if (!b) return;
+    var rec = recOf(id);
+    var acts = stageActs(b.j).concat(b.acts || []);
+    var h = '';
+    h += '<div style="display:flex;gap:13px;margin-bottom:6px">';
+    h += coverHTML(b);
+    h += '<div style="min-width:0;flex:1">';
+    h += '<h3 id="sheetTitle">' + esc(b.title) + '</h3>';
+    h += '<p class="kv" style="margin:0 0 6px">' + esc(b.author) + '</p>';
+    h += '<div class="badges"><span class="bd bd-ar">AR ' + b.ar.toFixed(1) + '</span>' +
+      '<span class="bd bd-lex">' + lexLabel(b.lex) + '</span>' +
+      '<span class="bd bd-j">' + J_INFO[b.j].short + '</span>' +
+      '<span class="bd" style="background:#eee9dd;color:#5f5a4c">' + b.il + ' · ' + b.pts.toFixed(1) + '점</span></div>';
+    h += '</div></div>';
+    h += '<p class="book-why" style="margin-top:10px">' + esc(b.why) + '</p>';
+    h += '<div class="lib-card" style="padding:12px;margin-top:10px">';
+    h += '<div class="lib-row"><span class="k">잠수네</span><span>' + J_INFO[b.j].name + '</span></div>';
+    h += '<div class="lib-row"><span class="k">주제</span><span>' + esc(b.theme) + '</span></div>';
+    h += '<div class="lib-row"><span class="k">출판</span><span>' + esc(b.pub) + ' · ' + b.year + ' · ' + b.pages + 'p</span></div>';
+    h += '<div class="lib-row"><span class="k">ISBN</span><span>' + b.isbn + '</span></div>';
+    h += '</div>';
+    h += '<div class="section-title" style="margin-top:16px">듣기 · 읽기</div>';
+    h += '<div class="linkrow">' +
+      '<a class="btn primary" href="' + ytReadAloud(b) + '" target="_blank" rel="noopener">▶ 유튜브 Read Aloud</a>' +
+      '<a class="btn" href="' + ytAudio(b) + '" target="_blank" rel="noopener">🎧 오디오북 찾기</a>' +
+      '</div>';
+    h += '<div class="linkrow">' +
+      '<a class="btn sm" href="' + openLibLink(b) + '" target="_blank" rel="noopener">📖 Open Library</a>' +
+      '<button class="btn sm" data-act="libFromBook" data-id="' + b.id + '">🏛 도서관 소장 확인</button>' +
+      '</div>';
+    h += '<div class="section-title">독후활동 제안 <span class="aside">J' + b.j + ' 기준</span></div>';
+    h += '<ul class="acts">' + acts.map(function (a, i) {
+      return '<li><input type="checkbox" data-detailact="' + i + '"><span>' + esc(a) + '</span></li>';
+    }).join('') + '</ul>';
+    h += '<div style="height:8px"></div>';
+    h += '<button class="btn wide primary" data-act="record" data-id="' + b.id + '">독서기록 쓰기</button>';
+    if (rec && rec.logs && rec.logs.length) {
+      h += '<button class="btn wide" style="margin-top:8px" data-act="openRec" data-id="' + b.id + '">내 기록 보기 (' + rec.logs.length + '회)</button>';
+    }
+    h += '<button class="btn wide ghost" style="margin-top:8px" data-act="close">닫기</button>';
+    openSheet(h);
+  }
+
+  function stageActs(j) { return (STAGE_ACTS[j] || STAGE_ACTS[3]).slice(); }
+
+  /* ---------- 기록 작성 ---------- */
+  var tmpRec = null;
+  function openRecordForm(bookId, recId, logIndex) {
+    var b, rec;
+    if (bookId) {
+      b = BOOKS.filter(function (x) { return x.id === bookId; })[0] || view.pending;
+      tmpRec = store.records[b.id] || {
+        id: b.id, title: b.title, author: b.author || '', isbn: b.isbn || '',
+        ar: b.ar || 0, lex: b.lex || '', j: b.j || 0, theme: b.theme || '',
+        why: b.why || '', acts: b.acts || [], src: b.src || 'catalog',
+        cover: b.cover || '', emoji: b.emoji || '', logs: []
+      };
+      rec = tmpRec;
+    } else {
+      rec = store.records[recId];
+      b = rec;
+    }
+    var log = (logIndex != null && rec.logs[logIndex]) ? rec.logs[logIndex] : {
+      date: todayISO(), rating: 0, flow: false, focus: false, alone: false, aloud: false,
+      repeats: 0, words: [], en: '', ko: '', audio: '', acts: {}
+    };
+    var acts = (b.acts && b.acts.length ? b.acts : []).concat(stageActs(b.j || 3));
+
+    var h = '';
+    h += '<h3 id="sheetTitle">' + esc(rec.title) + '</h3>';
+    h += '<p class="kv" style="margin:0 0 2px">' + (rec.ar ? 'AR ' + Number(rec.ar).toFixed(1) : 'AR —') + ' · ' + (rec.lex || 'Lexile —') + (rec.j ? ' · J' + rec.j : '') + '</p>';
+
+    h += '<div class="field"><label>읽은 날짜</label><input type="date" id="fDate" value="' + (log.date || todayISO()) + '"></div>';
+
+    h += '<div class="field"><label>별점</label><div class="stars" id="stars">' +
+      [1, 2, 3, 4, 5].map(function (n) { return '<span data-star="' + n + '" class="' + (log.rating >= n ? 'on' : '') + '">★</span>'; }).join('') +
+      '</div></div>';
+
+    h += '<div class="field"><label>듣기 · 읽기 체크</label>' +
+      checkRow('flow', '흘려듣기 (음원 틀어 두기)', log.flow) +
+      checkRow('focus', '집중듣기 (음원·CD 들으며 읽기)', log.focus) +
+      checkRow('aloud', '소리 내어 읽기', log.aloud) +
+      checkRow('alone', '혼자 읽기', log.alone) +
+      '</div>';
+
+    h += '<div class="field"><label>반복해서 읽기</label>' +
+      '<div class="counter"><button data-act="repMinus">−</button><b id="repVal">' + (log.repeats || 0) + '</b><button data-act="repPlus">+1</button>' +
+      '<span class="kv" style="margin-left:6px">이번 기록에서 더 읽은 횟수</span></div>' +
+      '<input type="hidden" id="fRepeats" value="' + (log.repeats || 0) + '"></div>';
+
+    h += '<div class="field"><label>단어 · 표현 노트</label><div id="words">' +
+      (log.words && log.words.length ? log.words.map(wordRow).join('') : wordRow({})) +
+      '</div><button class="btn sm" data-act="addWord">+ 단어 추가</button>' +
+      '<p class="hint">책에서 건진 단어와 짧은 표현을 적어 두면 나중에 복습 카드로 쓸 수 있어요.</p></div>';
+
+    h += '<div class="field"><label>영어 한 줄</label>' +
+      '<input id="fEn" placeholder="I like the part where Charlotte writes WORDS." value="' + esc(log.en) + '"></div>';
+    h += '<div class="field"><label>줄거리 · 느낀 점 (한글)</label>' +
+      '<textarea id="fKo" placeholder="한 줄 줄거리와 아이가 느낀 점을 적어 주세요.">' + esc(log.ko) + '</textarea></div>';
+    h += '<div class="field"><label>AR · 렉사일 메모</label>' +
+      '<input id="fMemo" placeholder="예: AR 4.4 맞음 / 렉사일 680L, 다음엔 3.5 단계로" value="' + esc(log.memo || '') + '"></div>';
+    h += '<div class="field"><label>나만의 음원 · 영상 주소</label>' +
+      '<input id="fAudio" placeholder="https://youtu.be/... (집중듣기에 쓸 링크)" value="' + esc(log.audio) + '">' +
+      '<p class="hint">유튜브 낭독·오디오북 링크를 저장해 두면 다음에 바로 열 수 있어요.</p></div>';
+
+    h += '<div class="section-title">독후활동 체크</div><ul class="acts">' +
+      acts.map(function (a, i) {
+        return '<li><input type="checkbox" data-actidx="' + i + '" ' + (log.acts && log.acts[i] ? 'checked' : '') + '><span>' + esc(a) + '</span></li>';
+      }).join('') + '</ul>';
+
+    h += '<div style="height:12px"></div>';
+    h += '<button class="btn wide primary" data-act="saveLog" data-id="' + esc(rec.id) + '" data-log="' + (logIndex == null ? '' : logIndex) + '">저장</button>';
+    if (logIndex != null) {
+      h += '<button class="btn wide" style="margin-top:8px;color:var(--danger)" data-act="delLog" data-id="' + esc(rec.id) + '" data-log="' + logIndex + '">이 기록 삭제</button>';
+    }
+    h += '<button class="btn wide ghost" style="margin-top:8px" data-act="close">닫기</button>';
+    openSheet(h);
+    bindForm(rec, log, acts, logIndex);
+  }
+  function checkRow(key, label, on) {
+    return '<label class="check ' + (on ? 'on' : '') + '"><input type="checkbox" data-flag="' + key + '" ' + (on ? 'checked' : '') + '><span>' + label + '</span></label>';
+  }
+  function wordRow(w) {
+    return '<div class="word-row"><input class="wWord" placeholder="word / phrase" value="' + esc(w.w || '') + '">' +
+      '<input class="wMean" placeholder="뜻" value="' + esc(w.m || '') + '"></div>';
+  }
+
+  var formTmp = { rating: 0, repeats: 0, flags: {}, acts: {} };
+  function bindForm(rec, log, acts, logIndex) {
+    formTmp.rating = log.rating || 0;
+    formTmp.repeats = log.repeats || 0;
+    formTmp.flags = { flow: !!log.flow, focus: !!log.focus, alone: !!log.alone, aloud: !!log.aloud };
+    formTmp.acts = Object.assign({}, log.acts || {});
+
+    var stars = document.getElementById('stars');
+    if (stars) stars.addEventListener('click', function (e) {
+      var s = e.target.closest('[data-star]');
+      if (!s) return;
+      formTmp.rating = parseInt(s.getAttribute('data-star'), 10);
+      Array.prototype.forEach.call(stars.children, function (c) {
+        c.classList.toggle('on', parseInt(c.getAttribute('data-star'), 10) <= formTmp.rating);
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-flag]'), function (cb) {
+      cb.addEventListener('change', function () {
+        formTmp.flags[cb.getAttribute('data-flag')] = cb.checked;
+        cb.closest('.check').classList.toggle('on', cb.checked);
+      });
+    });
+  }
+
+  function collectLog() {
+    var words = [];
+    Array.prototype.forEach.call(document.querySelectorAll('#words .word-row'), function (row) {
+      var w = row.querySelector('.wWord').value.trim();
+      var m = row.querySelector('.wMean').value.trim();
+      if (w || m) words.push({ w: w, m: m });
+    });
+    var acts = {};
+    Array.prototype.forEach.call(document.querySelectorAll('[data-actidx]'), function (cb) {
+      if (cb.checked) acts[cb.getAttribute('data-actidx')] = true;
+    });
+    var g = function (id) { var e = document.getElementById(id); return e ? e.value : ''; };
+    return {
+      date: g('fDate') || todayISO(),
+      rating: formTmp.rating || 0,
+      flow: !!formTmp.flags.flow, focus: !!formTmp.flags.focus,
+      alone: !!formTmp.flags.alone, aloud: !!formTmp.flags.aloud,
+      repeats: formTmp.repeats || 0,
+      words: words, en: g('fEn').trim(), ko: g('fKo').trim(),
+      memo: g('fMemo').trim(), audio: g('fAudio').trim(), acts: acts, at: new Date().toISOString()
+    };
+  }
+
+  /* ---------- 기록 상세 ---------- */
+  function openRecDetail(id) {
+    var r = store.records[id];
+    if (!r) return;
+    var h = '';
+    h += '<div style="display:flex;gap:12px"><div style="flex:none">' + coverHTML(r) + '</div>';
+    h += '<div><h3 id="sheetTitle" style="font-size:17px">' + esc(r.title) + '</h3>' +
+      '<p class="kv" style="margin:0 0 4px">' + esc(r.author) + '</p>' +
+      '<div class="badges"><span class="bd bd-ar">' + (r.ar ? 'AR ' + Number(r.ar).toFixed(1) : 'AR —') + '</span>' +
+      '<span class="bd bd-lex">' + (r.lex || 'Lexile —') + '</span>' + (r.j ? '<span class="bd bd-j">J' + r.j + '</span>' : '') + '</div></div></div>';
+    h += '<div class="linkrow"><a class="btn sm" href="' + ytReadAloud(r) + '" target="_blank" rel="noopener">▶ Read Aloud</a>' +
+      '<a class="btn sm" href="' + ytAudio(r) + '" target="_blank" rel="noopener">🎧 오디오북</a></div>';
+    if (!(r.logs || []).length) {
+      h += '<div class="empty">아직 기록이 없어요.</div>';
+      h += '<button class="btn wide primary" data-act="record" data-id="' + r.id + '">독서기록 쓰기</button>';
+      h += '<button class="btn wide ghost" style="margin-top:8px" data-act="close">닫기</button>';
+      openSheet(h); return;
+    }
+    h += '<div class="section-title">기록 ' + r.logs.length + '개</div>';
+    r.logs.slice().reverse().forEach(function (l, idx) {
+      var i = r.logs.length - 1 - idx;
+      var flags = [];
+      if (l.flow) flags.push('흘려듣기'); if (l.focus) flags.push('집중듣기');
+      if (l.aloud) flags.push('소리내어'); if (l.alone) flags.push('혼자');
+      h += '<div class="lib-card" style="padding:12px">';
+      h += '<div style="display:flex;justify-content:space-between;align-items:baseline">' +
+        '<b style="font-size:13px">' + fmtDate(l.date) + (l.repeats ? ' · +' + l.repeats + '회독' : '') + '</b>' +
+        '<span style="color:var(--accent);font-size:13px">' + '★'.repeat(l.rating || 0) + '</span></div>';
+      if (flags.length) h += '<p class="rec-flags">' + flags.join(' · ') + '</p>';
+      if (l.words && l.words.length) h += '<p class="kv">📝 ' + l.words.map(function (w) { return esc(w.w) + (w.m ? '(' + esc(w.m) + ')' : ''); }).join(', ') + '</p>';
+      if (l.en) h += '<p class="kv">🇬🇧 ' + esc(l.en) + '</p>';
+      if (l.ko) h += '<p class="kv">🇰🇷 ' + esc(l.ko) + '</p>';
+      if (l.memo) h += '<p class="kv">📐 ' + esc(l.memo) + '</p>';
+      if (l.audio) h += '<p class="kv">🎧 <a href="' + esc(l.audio) + '" target="_blank" rel="noopener" style="color:var(--brand)">저장한 음원 열기</a></p>';
+      h += '<div class="linkrow"><button class="btn sm" data-act="editLog" data-id="' + r.id + '" data-log="' + i + '">수정</button></div>';
+      h += '</div>';
+    });
+    h += '<button class="btn wide primary" data-act="record" data-id="' + r.id + '" style="margin-top:6px">독서기록 추가</button>';
+    h += '<button class="btn wide ghost" style="margin-top:8px" data-act="close">닫기</button>';
+    openSheet(h);
+  }
+
+  /* ---------- 설정 ---------- */
+  function openSettings() {
+    var s = store.settings;
+    var h = '';
+    h += '<h3 id="sheetTitle">설정</h3>';
+    h += '<div class="field"><label>북트리 목표 권수</label><select id="sGoal">' +
+      [100, 300, 500, 1000].map(function (g) { return '<option value="' + g + '" ' + (s.goal === g ? 'selected' : '') + '>' + g.toLocaleString() + '권</option>'; }).join('') +
+      '</select></div>';
+    h += '<div class="field"><label>도서관 정보나루 인증키 (선택)</label>' +
+      '<input id="sNaru" placeholder="data4library.kr 에서 발급" value="' + esc(s.naruKey) + '">' +
+      '<p class="hint">넣으면 ISBN으로 양산 지역 도서관 소장 여부를 앱에서 확인할 수 있어요. 키는 이 기기에만 저장됩니다.</p></div>';
+    h += '<div class="field"><label>도서관 검색 주소 (선택)</label>' +
+      '<input id="sTpl" placeholder="https://lib.yangsan.go.kr/... {q}" value="' + esc(s.libTpl) + '">' +
+      '<p class="hint">도서관 자료검색 화면의 주소를 붙여 넣고 검색어 자리에 <b>{q}</b>를 넣어 주세요. 비워 두면 홈페이지가 열리고 제목이 복사됩니다.</p></div>';
+    h += '<div class="linkrow"><button class="btn primary" data-act="saveSettings">저장</button>' +
+      '<button class="btn" data-act="exportData">기록 내보내기</button></div>';
+    h += '<div class="linkrow"><button class="btn" data-act="importData">기록 가져오기</button>' +
+      '<button class="btn" style="color:var(--danger)" data-act="resetAll">전체 초기화</button></div>';
+    h += '<p class="note">기록은 이 기기 브라우저(localStorage)에만 저장됩니다. 시크릿 모드나 캐시 삭제 시 사라지니 가끔 <b>내보내기</b>로 백업해 두세요.</p>';
+    h += '<button class="btn wide ghost" style="margin-top:8px" data-act="close">닫기</button>';
+    openSheet(h);
+  }
+  function saveSettings() {
+    var g = document.getElementById('sGoal');
+    var n = document.getElementById('sNaru');
+    var t = document.getElementById('sTpl');
+    store.settings.goal = g ? parseInt(g.value, 10) : 100;
+    store.settings.naruKey = n ? n.value.trim() : '';
+    store.settings.libTpl = t ? t.value.trim() : '';
+    saveStore(); closeSheet(); toast('저장했어요'); renderShelf(); renderBooks();
+  }
+  function exportData() {
+    var data = JSON.stringify(store, null, 1);
+    try {
+      var blob = new Blob([data], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'bookjaram-en-' + todayISO() + '.json';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+      toast('파일로 저장했어요');
+    } catch (e) {
+      copyText(data); toast('기록을 복사했어요');
+    }
+  }
+  function importData() {
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'application/json';
+    inp.onchange = function () {
+      var f = inp.files[0]; if (!f) return;
+      var fr = new FileReader();
+      fr.onload = function () {
+        try {
+          var d = JSON.parse(fr.result);
+          if (!d.records) throw 0;
+          store.records = Object.assign(store.records, d.records);
+          if (d.settings) store.settings = Object.assign(store.settings, d.settings);
+          saveStore(); closeSheet(); renderShelf(); toast('기록을 가져왔어요');
+        } catch (e) { toast('파일을 읽을 수 없어요'); }
+      };
+      fr.readAsText(f);
+    };
+    inp.click();
+  }
+  function resetAll() {
+    if (!confirm('이 기기의 독서기록을 모두 지울까요? 되돌릴 수 없어요.')) return;
+    store = { settings: Object.assign({}, DEFAULT_SETTINGS), records: {} };
+    saveStore(); closeSheet(); renderShelf(); renderBooks(); toast('초기화했어요');
+  }
+
+  /* =========================================================
+     10. 정보나루
+     ========================================================= */
+  function parseNaru(text) {
+    if (!text) return null;
+    text = text.trim();
+    if (text.charAt(0) === '{' || text.charAt(0) === '[') {
+      try { return JSON.parse(text); } catch (e) { }
+    }
+    try {
+      var doc = new DOMParser().parseFromString(text, 'text/xml');
+      return doc;
+    } catch (e) { return null; }
+  }
+  async function naruCheck() {
+    var key = store.settings.naruKey;
+    var isbnEl = document.getElementById('naruIsbn');
+    var isbn = isbnEl ? isbnEl.value.replace(/[^0-9Xx]/g, '') : '';
+    var out = document.getElementById('naruOut');
+    if (!key) { toast('설정에서 인증키를 먼저 넣어 주세요'); return; }
+    if (isbn.length < 10) { toast('ISBN을 넣어 주세요'); return; }
+    out.innerHTML = '<div class="empty">양산 도서관 목록을 확인하는 중…</div>';
+    try {
+      var r = await fetch('https://data4library.kr/api/libSrch?authKey=' + encodeURIComponent(key) + '&format=json&libName=' + encodeURIComponent('양산'));
+      var txt = await r.text();
+      var data = parseNaru(txt);
+      var libs = [];
+      if (data && data.libraries) {
+        (data.libraries || []).forEach(function (o) { if (o.lib) libs.push({ code: o.lib.libCode, name: o.lib.libName }); });
+      } else if (data && data.getElementsByTagName) {
+        var nodes = data.getElementsByTagName('lib');
+        for (var i = 0; i < nodes.length; i++) {
+          libs.push({ code: nodes[i].getElementsByTagName('libCode')[0].textContent, name: nodes[i].getElementsByTagName('libName')[0].textContent });
+        }
+      }
+      if (!libs.length) {
+        out.innerHTML = '<p class="kv">양산 지역 도서관을 찾지 못했어요. 인증키를 확인해 주세요.</p>' +
+          '<a class="btn sm" target="_blank" rel="noopener" href="https://data4library.kr/api/libSrch?authKey=' + encodeURIComponent(key) + '&format=json&libName=' + encodeURIComponent('양산') + '">정보나루에서 직접 확인</a>';
+        return;
+      }
+      var rows = [];
+      for (var k = 0; k < Math.min(libs.length, 6); k++) {
+        var l = libs[k];
+        try {
+          var r2 = await fetch('https://data4library.kr/api/bookExist?authKey=' + encodeURIComponent(key) + '&format=json&libCode=' + encodeURIComponent(l.code) + '&isbn13=' + isbn);
+          var t2 = await r2.text();
+          var d2 = parseNaru(t2);
+          var has = false, cnt = '';
+          if (d2 && d2.result) { has = String(d2.result.hasBook) === 'Y'; cnt = d2.result.loanAvailable || ''; }
+          else if (d2 && d2.getElementsByTagName) {
+            var res = d2.getElementsByTagName('result')[0];
+            if (res) {
+              has = (res.getElementsByTagName('hasBook')[0] || {}).textContent === 'Y';
+              var la = res.getElementsByTagName('loanAvailable')[0];
+              cnt = la ? la.textContent : '';
+            }
+          }
+          rows.push('<div class="lib-row"><span class="k" style="width:auto;flex:1">' + esc(l.name) + '</span><b style="color:' + (has ? 'var(--green)' : 'var(--muted)') + '">' + (has ? '소장' : '미소장') + (cnt ? ' · ' + (cnt === 'Y' ? '대출가능' : '대출중') : '') + '</b></div>');
+        } catch (e) {
+          rows.push('<div class="lib-row"><span class="k" style="flex:1">' + esc(l.name) + '</span><span>확인 실패</span></div>');
+        }
+      }
+      out.innerHTML = rows.join('');
+    } catch (e) {
+      out.innerHTML = '<p class="kv">브라우저에서 정보나루를 직접 부를 수 없어요(보안 제한). 아래 링크로 확인해 주세요.</p>' +
+        '<a class="btn sm" target="_blank" rel="noopener" href="https://data4library.kr/api/bookExist?authKey=' + encodeURIComponent(key) + '&format=json&isbn13=' + isbn + '">정보나루에서 소장 조회</a>';
+    }
+  }
+
+  /* =========================================================
+     11. 이벤트
+     ========================================================= */
+  document.querySelector('.tabbar').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tab]');
+    if (b) switchTab(b.getAttribute('data-tab'));
+  });
+  function switchTab(tab) {
+    view.tab = tab;
+    ['books', 'library', 'scan', 'shelf'].forEach(function (t) {
+      var sec = document.getElementById('tab-' + t);
+      if (sec) sec.hidden = (t !== tab);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab-btn'), function (b) {
+      var on = b.getAttribute('data-tab') === tab;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    if (tab === 'books') renderBooks();
+    if (tab === 'library') renderLibrary();
+    if (tab === 'scan') renderScan();
+    if (tab === 'shelf') renderShelf();
+    window.scrollTo({ top: 0 });
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-act],[data-mode],[data-dir],[data-band],[data-j],[data-jump],[data-sv],[data-goal],[data-leaf]');
+    if (!el) return;
+    var act = el.getAttribute('data-act');
+    var id = el.getAttribute('data-id');
+
+    if (el.hasAttribute('data-mode')) { view.mode = el.getAttribute('data-mode'); view.band = 'all'; renderBooks(); return; }
+    if (el.hasAttribute('data-dir')) { view.dir = parseInt(el.getAttribute('data-dir'), 10); renderBooks(); return; }
+    if (el.hasAttribute('data-band')) { view.band = el.getAttribute('data-band'); renderBooks(); return; }
+    if (el.hasAttribute('data-j')) { view.j = el.getAttribute('data-j'); renderBooks(); return; }
+    if (el.hasAttribute('data-goal')) {
+      store.settings.goal = parseInt(el.getAttribute('data-goal'), 10); saveStore(); renderShelf(); return;
+    }
+    if (el.hasAttribute('data-sv')) { view.shelfView = el.getAttribute('data-sv'); renderShelf(); return; }
+    if (el.hasAttribute('data-jump')) { switchTab('shelf'); return; }
+    if (el.hasAttribute('data-leaf')) { openRecDetail(el.getAttribute('data-leaf')); return; }
+
+    switch (act) {
+      case 'detail': openDetail(id); break;
+      case 'record': openRecordForm(id || null, id, null); break;
+      case 'openRec': openRecDetail(id); break;
+      case 'close': closeSheet(); break;
+      case 'openSettings': openSettings(); break;
+      case 'saveSettings': saveSettings(); break;
+      case 'exportData': exportData(); break;
+      case 'importData': importData(); break;
+      case 'resetAll': resetAll(); break;
+      case 'copyq': {
+        var q = libQuery();
+        if (!q) { toast('복사할 제목을 먼저 넣어 주세요'); break; }
+        toast(copyText(q) ? '“' + q.slice(0, 18) + '…” 복사했어요' : '복사하지 못했어요');
+        break;
+      }
+      case 'libSearch': openLibSearch(); break;
+
+      case 'libFromBook': {
+        var bk = BOOKS.filter(function (x) { return x.id === id; })[0];
+        closeSheet(); switchTab('library');
+        setTimeout(function () {
+          var inp = document.getElementById('libQ');
+          if (inp) { inp.value = bk ? bk.title : ''; }
+          toast('도서관에서 찾기를 눌러 주세요');
+        }, 120);
+        break;
+      }
+      case 'naruCheck': naruCheck(); break;
+      case 'scanStart': startScan(); break;
+      case 'scanStop': stopScan(); break;
+      case 'isbnLookup': {
+        var v = document.getElementById('isbnIn').value.replace(/[^0-9Xx]/g, '');
+        if (v.length < 10) { toast('ISBN을 확인해 주세요'); break; }
+        lookupISBN(v);
+        break;
+      }
+      case 'manual': {
+        var isbn = el.getAttribute('data-isbn') || (document.getElementById('isbnIn') ? document.getElementById('isbnIn').value.replace(/[^0-9Xx]/g, '') : '');
+        openManualForm(isbn); break;
+      }
+      case 'addPending': {
+        if (!view.pending) break;
+        var pr = ensureRec(view.pending);
+        toast('“' + pr.title.slice(0, 20) + '” 책장에 담았어요');
+        view.pending = null;
+        break;
+      }
+      case 'recordPending': {
+        if (!view.pending) break;
+        var b2 = view.pending;
+        ensureRec(b2);
+        openRecordForm(b2.id, b2.id, null);
+        break;
+      }
+      case 'repPlus': {
+        formTmp.repeats = Math.min(20, (formTmp.repeats || 0) + 1);
+        document.getElementById('repVal').textContent = formTmp.repeats; break;
+      }
+      case 'repMinus': {
+        formTmp.repeats = Math.max(0, (formTmp.repeats || 0) - 1);
+        document.getElementById('repVal').textContent = formTmp.repeats; break;
+      }
+      case 'addWord': {
+        var w = document.getElementById('words');
+        var div = document.createElement('div');
+        div.innerHTML = wordRow({});
+        w.appendChild(div.firstChild);
+        break;
+      }
+      case 'saveLog': {
+        var rid = el.getAttribute('data-id');
+        var li = el.getAttribute('data-log');
+        var rec = store.records[rid];
+        if (!rec && tmpRec && tmpRec.id === rid) { rec = tmpRec; store.records[rid] = rec; }
+        if (!rec) break;
+        var log = collectLog();
+        if (li === '' || li == null) rec.logs.push(log);
+        else rec.logs[parseInt(li, 10)] = log;
+        rec.logs.sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+        saveStore();
+        closeSheet();
+        toast('독서기록을 저장했어요');
+        if (view.tab === 'shelf') renderShelf();
+        if (view.tab === 'books') renderBooks();
+        break;
+      }
+      case 'editLog': {
+        var lid = el.getAttribute('data-id');
+        openRecordForm(null, lid, parseInt(el.getAttribute('data-log'), 10));
+        break;
+      }
+      case 'delLog': {
+        var did = el.getAttribute('data-id');
+        var di = parseInt(el.getAttribute('data-log'), 10);
+        if (!confirm('이 기록을 삭제할까요?')) break;
+        var r3 = store.records[did];
+        r3.logs.splice(di, 1);
+        saveStore(); closeSheet(); renderShelf(); toast('삭제했어요');
+        break;
+      }
+    }
+  });
+
+  function openManualForm(isbn) {
+    var h = '';
+    h += '<h3 id="sheetTitle">직접 입력해서 담기</h3>';
+    h += '<div class="field"><label>제목</label><input id="mTitle" placeholder="Book title"></div>';
+    h += '<div class="field"><label>저자</label><input id="mAuthor" placeholder="Author"></div>';
+    h += '<div class="field"><label>ISBN</label><input id="mIsbn" value="' + esc(isbn || '') + '"></div>';
+    h += '<div class="field"><label>AR 지수 (모르면 비워 두세요)</label><input id="mAr" inputmode="decimal" placeholder="3.2"></div>';
+    h += '<div class="field"><label>렉사일 지수 (예: 500L, AD350L, BR)</label><input id="mLex" placeholder="500L"></div>';
+    h += '<button class="btn wide primary" data-act="saveManual">담기</button>';
+    openSheet(h);
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-act="saveManual"]');
+    if (!el) return;
+    var t = document.getElementById('mTitle').value.trim();
+    if (!t) { toast('제목을 넣어 주세요'); return; }
+    var isbn = document.getElementById('mIsbn').value.replace(/[^0-9Xx]/g, '');
+    var ar = parseFloat(document.getElementById('mAr').value) || 0;
+    var lex = document.getElementById('mLex').value.trim().toUpperCase();
+    var b = {
+      id: isbn ? 'c' + isbn : 'c' + Date.now(), title: t,
+      author: document.getElementById('mAuthor').value.trim(), isbn: isbn,
+      ar: ar, lex: lex, j: ar ? (ar <= 0.9 ? 1 : ar <= 1.5 ? 2 : ar <= 2.5 ? 3 : ar <= 3.5 ? 4 : ar <= 4.5 ? 5 : ar <= 5.5 ? 6 : 7) : 0,
+      theme: '', why: '', acts: [], src: 'custom', emoji: '📘'
+    };
+    ensureRec(b);
+    closeSheet();
+    toast('책장에 담았어요');
+  });
+
+  document.getElementById('btnSettings').addEventListener('click', openSettings);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+
+  /* =========================================================
+     12. 시작
+     ========================================================= */
+  renderBooks();
+  window.__app = { view: view, store: store, renderBooks: renderBooks, renderShelf: renderShelf, switchTab: switchTab, openDetail: openDetail, openRecordForm: openRecordForm, BOOKS: BOOKS };
+})();
+
+</script>
+</body>
+</html>
